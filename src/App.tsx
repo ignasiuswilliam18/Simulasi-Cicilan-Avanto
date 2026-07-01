@@ -20,8 +20,8 @@ export default function App() {
   const currentOppoCare = OPPO_CARE_PRODUCTS?.[selectedOppoCare];
   const currentIot = IOT_PRODUCTS?.[selectedIot];
 
-  // MENYESUAIKAN FORMULA EXCEL: Kredivo menggunakan bunga flat 2.99% (0.0299) sesuai formula bar
-  const monthlyRate = platform === 'Kredivo' ? 0.0299 : 0.032;
+  // PERBAIKAN FINAL: Kedua platform (Kredivo & YesssCredit) sekarang menggunakan bunga flat 3.75% (0.0375)
+  const monthlyRate = 0.0375;
 
   // ================= PERHITUNGAN 1: HP SAJA =================
   const hpPrice = currentHp && currentHp.price > 0 ? currentHp.price : 0;
@@ -295,8 +295,8 @@ export default function App() {
 
             {/* LIVE FOOTER STATUS */}
             <div className="pt-3 border-t border-slate-200/60 flex justify-between items-center text-[10px] text-slate-400">
-              <span>Engine Status: <strong className="text-emerald-600">Excel Math Matching</strong></span>
-              <span className="font-bold text-slate-500">v3.4 - Fixed</span>
+              <span>Engine Status: <strong className="text-emerald-600">Dual Platform 3.75% Match</strong></span>
+              <span className="font-bold text-slate-500">v3.5 - Final</span>
             </div>
 
           </div>
