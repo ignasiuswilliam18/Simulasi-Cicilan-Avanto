@@ -20,18 +20,19 @@ export default function App() {
   const currentOppoCare = OPPO_CARE_PRODUCTS?.[selectedOppoCare];
   const currentIot = IOT_PRODUCTS?.[selectedIot];
 
-  // PERBAIKAN FINAL: Kedua platform (Kredivo & YesssCredit) sekarang menggunakan bunga flat 3.75% (0.0375)
+  // Suku bunga dikunci di 3.75% (0.0375) untuk kedua platform
   const monthlyRate = 0.0375;
 
   // ================= PERHITUNGAN 1: HP SAJA =================
   const hpPrice = currentHp && currentHp.price > 0 ? currentHp.price : 0;
   
-  // Logika Kredivo (Admin 2% ikut dibungakan) vs YesssCredit (Admin 60rb flat tidak dibungakan)
+  // Nominal Admin: Kredivo 2% dari harga barang, YesssCredit flat Rp 60.000
   const hpAdminTotal = platform === 'Kredivo' ? Math.round(hpPrice * 0.02) : 60000;
-  const hpPrincipalWithAdmin = platform === 'Kredivo' ? (hpPrice + hpAdminTotal) : hpPrice;
+  // KOREKSI: Kedua platform sekarang memasukkan Admin ke dalam Pokok Pinjaman untuk dibungakan
+  const hpPrincipalWithAdmin = hpPrice > 0 ? (hpPrice + hpAdminTotal) : 0;
   
   const hpInterestTotal = Math.round(hpPrincipalWithAdmin * monthlyRate * tenor);
-  const hpTotalLoan = hpPrincipalWithAdmin + hpInterestTotal + (platform === 'YesssCredit' ? hpAdminTotal : 0);
+  const hpTotalLoan = hpPrincipalWithAdmin + hpInterestTotal;
   const hpOnlyMonthlyInstallment = hpPrice > 0 ? Math.round(hpTotalLoan / tenor) : 0;
 
   // ================= PERHITUNGAN 2: PAKET LENGKAP =================
@@ -39,11 +40,12 @@ export default function App() {
   const iotPrice = currentIot && currentIot.price > 0 ? currentIot.price : 0;
   const totalBundlePrice = hpPrice + oppoCarePrice + iotPrice;
 
+  // Nominal Admin Paket: Kredivo 2%, YesssCredit flat Rp 60.000
   const bundleAdminTotal = platform === 'Kredivo' ? Math.round(totalBundlePrice * 0.02) : 60000;
-  const bundlePrincipalWithAdmin = platform === 'Kredivo' ? (totalBundlePrice + bundleAdminTotal) : totalBundlePrice;
+  const bundlePrincipalWithAdmin = totalBundlePrice > 0 ? (totalBundlePrice + bundleAdminTotal) : 0;
 
   const bundleInterestTotal = Math.round(bundlePrincipalWithAdmin * monthlyRate * tenor);
-  const bundleTotalLoan = bundlePrincipalWithAdmin + bundleInterestTotal + (platform === 'YesssCredit' ? bundleAdminTotal : 0);
+  const bundleTotalLoan = bundlePrincipalWithAdmin + bundleInterestTotal;
   const bundleMonthlyInstallment = totalBundlePrice > 0 ? Math.round(bundleTotalLoan / tenor) : 0;
 
   return (
@@ -229,7 +231,7 @@ export default function App() {
                     <div className="flex justify-between text-slate-500">
                       <span>Biaya Admin ({platform === 'Kredivo' ? '2%' : 'Flat'}):</span>
                       <span className="font-medium text-slate-700">
-                        Rp {hpAdminTotal.toLocaleString('id-ID')} <span className="text-[10px] text-slate-400">(Rp {Math.round(hpAdminTotal/tenor).toLocaleString('id-ID')}/bln)</span>
+                        Rp {hpAdminTotal.toLocaleString('id-ID')} <span className="text-[10px] text-slate-400">(Sistem Kapitalisasi)</span>
                       </span>
                     </div>
                     <div className="flex justify-between text-slate-500">
@@ -254,7 +256,7 @@ export default function App() {
                     <div className="flex justify-between text-slate-500">
                       <span>Biaya Admin ({platform === 'Kredivo' ? '2%' : 'Flat'}):</span>
                       <span className="font-medium text-slate-700">
-                        Rp {bundleAdminTotal.toLocaleString('id-ID')} <span className="text-[10px] text-slate-400">(Rp {Math.round(bundleAdminTotal/tenor).toLocaleString('id-ID')}/bln)</span>
+                        Rp {bundleAdminTotal.toLocaleString('id-ID')} <span className="text-[10px] text-slate-400">(Sistem Kapitalisasi)</span>
                       </span>
                     </div>
                     <div className="flex justify-between text-slate-500">
@@ -295,8 +297,8 @@ export default function App() {
 
             {/* LIVE FOOTER STATUS */}
             <div className="pt-3 border-t border-slate-200/60 flex justify-between items-center text-[10px] text-slate-400">
-              <span>Engine Status: <strong className="text-emerald-600">Dual Platform 3.75% Match</strong></span>
-              <span className="font-bold text-slate-500">v3.5 - Final</span>
+              <span>Engine Status: <strong className="text-emerald-600">Full Capitalized Admin Mode</strong></span>
+              <span className="font-bold text-slate-500">v3.6 - Production</span>
             </div>
 
           </div>
