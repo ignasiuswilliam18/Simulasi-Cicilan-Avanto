@@ -22,8 +22,8 @@ export default function App() {
   const currentOppoCare = OPPO_CARE_PRODUCTS?.[selectedOppoCare];
   const currentIot = IOT_PRODUCTS?.[selectedIot];
 
-  // Menentukan suku bunga flat berdasarkan platform
-  const monthlyRate = platform === 'Kredivo' ? 0.029 : 0.032;
+  // PERBAIKAN: Suku bunga Kredivo diatur ke 3.75% (0.0375) sesuai request
+  const monthlyRate = platform === 'Kredivo' ? 0.0375 : 0.032;
   const annualRate = monthlyRate * 12; 
 
   // KOREKSI BIAYA ADMIN: Kredivo 2% dari harga barang, YesssCredit flat Rp 60.000
@@ -249,7 +249,7 @@ export default function App() {
                       </span>
                     </div>
                     <div className="flex justify-between text-slate-500">
-                      <span>Total Bunga ({(monthlyRate * 100).toFixed(1)}%/bln):</span>
+                      <span>Total Bunga ({(monthlyRate * 100).toFixed(2)}%/bln):</span>
                       <span className="font-medium text-slate-700">
                         Rp {calcHpOnlyBase.totalInterest.toLocaleString('id-ID')} <span className="text-[10px] text-slate-400">(Rp {Math.round(calcHpOnlyBase.totalInterest/tenor).toLocaleString('id-ID')}/bln)</span>
                       </span>
@@ -270,7 +270,7 @@ export default function App() {
                       </span>
                     </div>
                     <div className="flex justify-between text-slate-500">
-                      <span>Total Bunga ({(monthlyRate * 100).toFixed(1)}%/bln):</span>
+                      <span>Total Bunga ({(monthlyRate * 100).toFixed(2)}%/bln):</span>
                       <span className="font-medium text-slate-700">
                         Rp {calcBundleBase.totalInterest.toLocaleString('id-ID')} <span className="text-[10px] text-slate-400">(Rp {Math.round(calcBundleBase.totalInterest/tenor).toLocaleString('id-ID')}/bln)</span>
                       </span>
@@ -294,7 +294,7 @@ export default function App() {
               </div>
             ) : (
               <div className="h-full min-h-[260px] border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center p-6 text-center bg-white">
-                <span className="text-3xl mb-2 animate-bounce">📱</span>
+                <span className="text-3xl mb-2">📱</span>
                 <p className="text-xs font-semibold text-slate-400 italic max-w-[220px]">
                   Silakan tentukan model smartphone di panel kiri untuk membuka lembar rincian simulasi lengkap.
                 </p>
@@ -304,7 +304,7 @@ export default function App() {
             {/* LIVE FOOTER STATUS */}
             <div className="pt-3 border-t border-slate-200/60 flex justify-between items-center text-[10px] text-slate-400">
               <span>Engine Status: <strong className="text-emerald-600">Admin Split Mode</strong></span>
-              <span className="font-bold text-slate-500">v3.2 - Live</span>
+              <span className="font-bold text-slate-500">v3.3 - Updated Rate</span>
             </div>
 
           </div>
