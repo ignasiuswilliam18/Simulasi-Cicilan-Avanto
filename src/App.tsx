@@ -6,8 +6,6 @@ import {
   OPPO_CARE_PRODUCTS, 
   IOT_PRODUCTS 
 } from './data';
-// Import core engine finansial
-import { calculateFinancing } from './Engine/FinancingEngine';
 
 export default function App() {
   // ================= STATE SIMULATOR =================
@@ -22,45 +20,31 @@ export default function App() {
   const currentOppoCare = OPPO_CARE_PRODUCTS?.[selectedOppoCare];
   const currentIot = IOT_PRODUCTS?.[selectedIot];
 
-  // PERBAIKAN: Suku bunga Kredivo diatur ke 3.75% (0.0375) sesuai request
-  const monthlyRate = platform === 'Kredivo' ? 0.0375 : 0.032;
-  const annualRate = monthlyRate * 12; 
-
-  // KOREKSI BIAYA ADMIN: Kredivo 2% dari harga barang, YesssCredit flat Rp 60.000
-  const getAdminFee = (price: number) => {
-    if (price === 0) return 0;
-    return platform === 'Kredivo' ? Math.round(price * 0.02) : 60000;
-  };
+  // MENYESUAIKAN FORMULA EXCEL: Kredivo menggunakan bunga flat 2.99% (0.0299) sesuai formula bar
+  const monthlyRate = platform === 'Kredivo' ? 0.0299 : 0.032;
 
   // ================= PERHITUNGAN 1: HP SAJA =================
   const hpPrice = currentHp && currentHp.price > 0 ? currentHp.price : 0;
-  const hpAdmin = getAdminFee(hpPrice);
   
-  const calcHpOnlyBase = calculateFinancing({
-    price: hpPrice,
-    downPayment: 0,
-    tenor: tenor,
-    interestRate: annualRate
-  });
+  // Logika Kredivo (Admin 2% ikut dibungakan) vs YesssCredit (Admin 60rb flat tidak dibungakan)
+  const hpAdminTotal = platform === 'Kredivo' ? Math.round(hpPrice * 0.02) : 60000;
+  const hpPrincipalWithAdmin = platform === 'Kredivo' ? (hpPrice + hpAdminTotal) : hpPrice;
   
-  // Total Cicilan Bulanan HP Saja (Cicilan Pokok + Bunga + (Biaya Admin / Tenor))
-  const hpOnlyMonthlyInstallment = calcHpOnlyBase.monthlyInstallment + Math.round(hpAdmin / tenor);
+  const hpInterestTotal = Math.round(hpPrincipalWithAdmin * monthlyRate * tenor);
+  const hpTotalLoan = hpPrincipalWithAdmin + hpInterestTotal + (platform === 'YesssCredit' ? hpAdminTotal : 0);
+  const hpOnlyMonthlyInstallment = hpPrice > 0 ? Math.round(hpTotalLoan / tenor) : 0;
 
   // ================= PERHITUNGAN 2: PAKET LENGKAP =================
   const oppoCarePrice = currentOppoCare && currentOppoCare.price > 0 ? currentOppoCare.price : 0;
   const iotPrice = currentIot && currentIot.price > 0 ? currentIot.price : 0;
   const totalBundlePrice = hpPrice + oppoCarePrice + iotPrice;
-  const bundleAdmin = getAdminFee(totalBundlePrice);
 
-  const calcBundleBase = calculateFinancing({
-    price: totalBundlePrice,
-    downPayment: 0,
-    tenor: tenor,
-    interestRate: annualRate
-  });
+  const bundleAdminTotal = platform === 'Kredivo' ? Math.round(totalBundlePrice * 0.02) : 60000;
+  const bundlePrincipalWithAdmin = platform === 'Kredivo' ? (totalBundlePrice + bundleAdminTotal) : totalBundlePrice;
 
-  // Total Cicilan Bulanan Paket Lengkap (Cicilan Pokok + Bunga + (Biaya Admin / Tenor))
-  const bundleMonthlyInstallment = calcBundleBase.monthlyInstallment + Math.round(bundleAdmin / tenor);
+  const bundleInterestTotal = Math.round(bundlePrincipalWithAdmin * monthlyRate * tenor);
+  const bundleTotalLoan = bundlePrincipalWithAdmin + bundleInterestTotal + (platform === 'YesssCredit' ? bundleAdminTotal : 0);
+  const bundleMonthlyInstallment = totalBundlePrice > 0 ? Math.round(bundleTotalLoan / tenor) : 0;
 
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col items-center justify-center p-4">
@@ -245,14 +229,18 @@ export default function App() {
                     <div className="flex justify-between text-slate-500">
                       <span>Biaya Admin ({platform === 'Kredivo' ? '2%' : 'Flat'}):</span>
                       <span className="font-medium text-slate-700">
-                        Rp {hpAdmin.toLocaleString('id-ID')} <span className="text-[10px] text-slate-400">(Rp {Math.round(hpAdmin/tenor).toLocaleString('id-ID')}/bln)</span>
+                        Rp {hpAdminTotal.toLocaleString('id-ID')} <span className="text-[10px] text-slate-400">(Rp {Math.round(hpAdminTotal/tenor).toLocaleString('id-ID')}/bln)</span>
                       </span>
                     </div>
                     <div className="flex justify-between text-slate-500">
                       <span>Total Bunga ({(monthlyRate * 100).toFixed(2)}%/bln):</span>
                       <span className="font-medium text-slate-700">
-                        Rp {calcHpOnlyBase.totalInterest.toLocaleString('id-ID')} <span className="text-[10px] text-slate-400">(Rp {Math.round(calcHpOnlyBase.totalInterest/tenor).toLocaleString('id-ID')}/bln)</span>
+                        Rp {hpInterestTotal.toLocaleString('id-ID')} <span className="text-[10px] text-slate-400">(Rp {Math.round(hpInterestTotal/tenor).toLocaleString('id-ID')}/bln)</span>
                       </span>
+                    </div>
+                    <div className="flex justify-between text-slate-700 font-bold bg-slate-50 p-1 rounded mt-1">
+                      <span>Total Pengembalian:</span>
+                      <span>Rp {hpTotalLoan.toLocaleString('id-ID')}</span>
                     </div>
                   </div>
 
@@ -266,14 +254,18 @@ export default function App() {
                     <div className="flex justify-between text-slate-500">
                       <span>Biaya Admin ({platform === 'Kredivo' ? '2%' : 'Flat'}):</span>
                       <span className="font-medium text-slate-700">
-                        Rp {bundleAdmin.toLocaleString('id-ID')} <span className="text-[10px] text-slate-400">(Rp {Math.round(bundleAdmin/tenor).toLocaleString('id-ID')}/bln)</span>
+                        Rp {bundleAdminTotal.toLocaleString('id-ID')} <span className="text-[10px] text-slate-400">(Rp {Math.round(bundleAdminTotal/tenor).toLocaleString('id-ID')}/bln)</span>
                       </span>
                     </div>
                     <div className="flex justify-between text-slate-500">
                       <span>Total Bunga ({(monthlyRate * 100).toFixed(2)}%/bln):</span>
                       <span className="font-medium text-slate-700">
-                        Rp {calcBundleBase.totalInterest.toLocaleString('id-ID')} <span className="text-[10px] text-slate-400">(Rp {Math.round(calcBundleBase.totalInterest/tenor).toLocaleString('id-ID')}/bln)</span>
+                        Rp {bundleInterestTotal.toLocaleString('id-ID')} <span className="text-[10px] text-slate-400">(Rp {Math.round(bundleInterestTotal/tenor).toLocaleString('id-ID')}/bln)</span>
                       </span>
+                    </div>
+                    <div className="flex justify-between text-emerald-900 font-bold bg-emerald-50/50 p-1 rounded mt-1">
+                      <span>Total Pengembalian:</span>
+                      <span>Rp {bundleTotalLoan.toLocaleString('id-ID')}</span>
                     </div>
                   </div>
 
@@ -288,7 +280,7 @@ export default function App() {
                 </div>
 
                 <div className="text-center text-[10px] text-slate-400 italic">
-                  *Rincian biaya admin & bunga di atas otomatis sudah dibagi rata ke setiap bulan cicilan.
+                  *Rumus hitung disamakan 100% dengan skema hitungan berkas master Excel finansial.
                 </div>
 
               </div>
@@ -303,8 +295,8 @@ export default function App() {
 
             {/* LIVE FOOTER STATUS */}
             <div className="pt-3 border-t border-slate-200/60 flex justify-between items-center text-[10px] text-slate-400">
-              <span>Engine Status: <strong className="text-emerald-600">Admin Split Mode</strong></span>
-              <span className="font-bold text-slate-500">v3.3 - Updated Rate</span>
+              <span>Engine Status: <strong className="text-emerald-600">Excel Math Matching</strong></span>
+              <span className="font-bold text-slate-500">v3.4 - Fixed</span>
             </div>
 
           </div>
