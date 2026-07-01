@@ -1,4 +1,4 @@
-import { FinancingProvider } from '../Data';
+import type { FinancingProvider } from '../data';
 
 export interface CalculationResult {
   tenor: number;
