@@ -1,44 +1,317 @@
+import { useState } from 'react';
+// Import data utama
+import { 
+  type ProductItem, 
+  HP_PRODUCTS, 
+  OPPO_CARE_PRODUCTS, 
+  IOT_PRODUCTS 
+} from './data';
+// Import core engine finansial
+import { calculateFinancing } from './Engine/FinancingEngine';
+
 export default function App() {
+  // ================= STATE SIMULATOR =================
+  const [platform, setPlatform] = useState<'Kredivo' | 'YesssCredit'>('Kredivo');
+  const [selectedModel, setSelectedModel] = useState('');
+  const [selectedOppoCare, setSelectedOppoCare] = useState(0); // Index array
+  const [selectedIot, setSelectedIot] = useState(0); // Index array
+  const [tenor, setTenor] = useState<number>(3); // Default tenor 3 Bulan
+
+  // Mengambil item yang sedang dipilih oleh promotor
+  const currentHp = HP_PRODUCTS?.find((p: ProductItem) => p.model === selectedModel);
+  const currentOppoCare = OPPO_CARE_PRODUCTS?.[selectedOppoCare];
+  const currentIot = IOT_PRODUCTS?.[selectedIot];
+
+  // Menentukan suku bunga flat berdasarkan platform
+  const monthlyRate = platform === 'Kredivo' ? 0.029 : 0.032;
+  const annualRate = monthlyRate * 12; 
+
+  // KOREKSI BIAYA ADMIN: Kredivo 2% dari harga barang, YesssCredit flat Rp 60.000
+  const getAdminFee = (price: number) => {
+    if (price === 0) return 0;
+    return platform === 'Kredivo' ? Math.round(price * 0.02) : 60000;
+  };
+
+  // ================= PERHITUNGAN 1: HP SAJA =================
+  const hpPrice = currentHp && currentHp.price > 0 ? currentHp.price : 0;
+  const hpAdmin = getAdminFee(hpPrice);
+  
+  const calcHpOnlyBase = calculateFinancing({
+    price: hpPrice,
+    downPayment: 0,
+    tenor: tenor,
+    interestRate: annualRate
+  });
+  
+  // Total Cicilan Bulanan HP Saja (Cicilan Pokok + Bunga + (Biaya Admin / Tenor))
+  const hpOnlyMonthlyInstallment = calcHpOnlyBase.monthlyInstallment + Math.round(hpAdmin / tenor);
+
+  // ================= PERHITUNGAN 2: PAKET LENGKAP =================
+  const oppoCarePrice = currentOppoCare && currentOppoCare.price > 0 ? currentOppoCare.price : 0;
+  const iotPrice = currentIot && currentIot.price > 0 ? currentIot.price : 0;
+  const totalBundlePrice = hpPrice + oppoCarePrice + iotPrice;
+  const bundleAdmin = getAdminFee(totalBundlePrice);
+
+  const calcBundleBase = calculateFinancing({
+    price: totalBundlePrice,
+    downPayment: 0,
+    tenor: tenor,
+    interestRate: annualRate
+  });
+
+  // Total Cicilan Bulanan Paket Lengkap (Cicilan Pokok + Bunga + (Biaya Admin / Tenor))
+  const bundleMonthlyInstallment = calcBundleBase.monthlyInstallment + Math.round(bundleAdmin / tenor);
+
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        background: "#f8fafc",
-        fontFamily: "Segoe UI",
-      }}
-    >
-      <div style={{ textAlign: "center" }}>
-        <h1
-          style={{
-            color: "#008A5E",
-            fontSize: "42px",
-          }}
-        >
-          AVANTO FINANCING SIMULATOR
-        </h1>
+    <div className="min-h-screen bg-slate-100 flex flex-col items-center justify-center p-4">
+      <div className="bg-white shadow-2xl rounded-3xl p-6 w-full max-w-4xl transition-all">
+        
+        {/* TOP BRANDING HEADER */}
+        <div className="text-center mb-8 border-b border-slate-100 pb-4">
+          <h1 className="text-3xl font-black text-emerald-600 tracking-tighter">AVANTO</h1>
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">
+            Promotor Smart Bundle Simulator
+          </p>
+        </div>
 
-        <p
-          style={{
-            color: "#64748b",
-            marginTop: "10px",
-          }}
-        >
-          Version 0.1.0
-        </p>
+        {/* INTERACTIVE TWO-COLUMN GRID */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          
+          {/* KOLOM KIRI: INPUT PANEL */}
+          <div className="space-y-5">
+            
+            {/* 1. SELEKSI PLATFORM FINANCING */}
+            <div>
+              <label className="block text-[11px] font-extrabold text-slate-500 uppercase tracking-wider mb-2">
+                1. Pilih Platform Pembiayaan
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {(['Kredivo', 'YesssCredit'] as const).map((p) => (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => setPlatform(p)}
+                    className={`py-2.5 text-xs font-bold rounded-xl border transition-all duration-200 ${
+                      platform === p
+                        ? 'bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-100'
+                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                    }`}
+                  >
+                    Avanto by {p}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-        <p
-          style={{
-            marginTop: "30px",
-            color: "#16a34a",
-            fontWeight: "bold",
-          }}
-        >
-          🚀 Project Ready for Development
-        </p>
+            {/* 2. SELECT SMARTPHONE */}
+            <div>
+              <label className="block text-[11px] font-extrabold text-slate-500 uppercase tracking-wider mb-2">
+                2. Pilih Tipe HP OPPO
+              </label>
+              <select
+                value={selectedModel}
+                onChange={(e) => setSelectedModel(e.target.value)}
+                className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-3 py-3 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-50 font-semibold cursor-pointer"
+              >
+                {HP_PRODUCTS?.map((product: ProductItem, index: number) => (
+                  <option key={index} value={product.model}>
+                    {product.model} {product.price > 0 ? ` - Rp ${product.price.toLocaleString('id-ID')}` : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* 3. SELECT PROTEKSI OPPO CARE */}
+            <div>
+              <label className="block text-[11px] font-extrabold text-slate-500 uppercase tracking-wider mb-2">
+                3. Tambah Proteksi OPPO Care
+              </label>
+              <select
+                value={selectedOppoCare}
+                onChange={(e) => setSelectedOppoCare(Number(e.target.value))}
+                className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-3 py-3 text-sm outline-none focus:border-emerald-500 font-semibold cursor-pointer"
+              >
+                {OPPO_CARE_PRODUCTS?.map((item: ProductItem, idx: number) => (
+                  <option key={idx} value={idx}>
+                    {item.model} {item.price > 0 ? ` (+Rp ${item.price.toLocaleString('id-ID')})` : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* 4. SELECT GADGET IOT */}
+            <div>
+              <label className="block text-[11px] font-extrabold text-slate-500 uppercase tracking-wider mb-2">
+                4. Tambah Produk IoT
+              </label>
+              <select
+                value={selectedIot}
+                onChange={(e) => setSelectedIot(Number(e.target.value))}
+                className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-3 py-3 text-sm outline-none focus:border-emerald-500 font-semibold cursor-pointer"
+              >
+                {IOT_PRODUCTS?.map((item: ProductItem, idx: number) => (
+                  <option key={idx} value={idx}>
+                    {item.model} {item.price > 0 ? ` (+Rp ${item.price.toLocaleString('id-ID')})` : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* 5. SELEKSI MATRIKS TENOR */}
+            <div>
+              <label className="block text-[11px] font-extrabold text-slate-500 uppercase tracking-wider mb-2">
+                5. Pilih Masa Tenor
+              </label>
+              <div className="grid grid-cols-4 gap-2">
+                {[3, 6, 9, 12].map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => setTenor(m)}
+                    className={`py-2.5 text-xs font-bold rounded-xl border transition-all ${
+                      tenor === m
+                        ? 'bg-emerald-600 text-white border-emerald-600 shadow-md'
+                        : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                    }`}
+                  >
+                    {m} Bln
+                  </button>
+                ))}
+              </div>
+            </div>
+
+          </div>
+
+          {/* KOLOM KANAN: LIVE COMPARISON REPORT DISPLAY */}
+          <div className="flex flex-col justify-between bg-slate-50/50 rounded-2xl p-5 border border-slate-100">
+            
+            {currentHp && currentHp.price > 0 ? (
+              <div className="space-y-4">
+                
+                <div className="text-[11px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-100 px-3 py-1.5 rounded-xl inline-block">
+                  ⚡ Skema Pembiayaan: Avanto via {platform} ({tenor} Bulan)
+                </div>
+
+                {/* CARDS SIDE BY SIDE */}
+                <div className="grid grid-cols-2 gap-3">
+                  
+                  {/* Paket HP Saja */}
+                  <div className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col justify-between shadow-sm">
+                    <div>
+                      <span className="text-[10px] font-extrabold text-slate-400 uppercase block">Opsi 1</span>
+                      <h4 className="text-xs font-bold text-slate-700 mt-0.5">HP Saja</h4>
+                      <p className="text-[9px] text-slate-400 mt-0.5 truncate">{currentHp.model}</p>
+                    </div>
+                    <div className="mt-4 pt-2 border-t border-slate-100">
+                      <span className="text-[9px] text-slate-400 block font-medium">Cicilan / bln:</span>
+                      <span className="text-sm font-bold text-slate-800">
+                        Rp {hpOnlyMonthlyInstallment.toLocaleString('id-ID')}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Paket Lengkap */}
+                  <div className="bg-gradient-to-br from-emerald-50/30 to-white border-2 border-emerald-500 rounded-2xl p-4 flex flex-col justify-between shadow-lg shadow-emerald-50 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 bg-emerald-500 text-[8px] text-white font-black px-2 py-0.5 rounded-bl-xl uppercase tracking-wider">
+                      Combo
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-extrabold text-emerald-600 uppercase block">Opsi 2</span>
+                      <h4 className="text-xs font-bold text-emerald-900 mt-0.5">Paket Lengkap</h4>
+                      <p className="text-[9px] font-medium text-slate-500 mt-0.5 leading-tight truncate">
+                        {currentHp.model} Combo
+                      </p>
+                    </div>
+                    <div className="mt-4 pt-2 border-t border-emerald-100">
+                      <span className="text-[9px] text-emerald-700 block font-bold">Cicilan / bln:</span>
+                      <span className="text-base font-extrabold text-emerald-600">
+                        Rp {bundleMonthlyInstallment.toLocaleString('id-ID')}
+                      </span>
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* DETIL TRANSPARANSI BIAYA (BUNGA & ADMIN) */}
+                <div className="bg-white border border-slate-200 rounded-2xl p-4 text-[11px] space-y-3 shadow-sm">
+                  
+                  {/* Bagian HP Saja */}
+                  <div>
+                    <h5 className="font-bold text-slate-700 border-b border-slate-100 pb-1 mb-1.5">Rincian Opsi 1 (HP Saja):</h5>
+                    <div className="flex justify-between text-slate-500">
+                      <span>Harga Unit HP:</span>
+                      <span className="font-medium text-slate-700">Rp {hpPrice.toLocaleString('id-ID')}</span>
+                    </div>
+                    <div className="flex justify-between text-slate-500">
+                      <span>Biaya Admin ({platform === 'Kredivo' ? '2%' : 'Flat'}):</span>
+                      <span className="font-medium text-slate-700">
+                        Rp {hpAdmin.toLocaleString('id-ID')} <span className="text-[10px] text-slate-400">(Rp {Math.round(hpAdmin/tenor).toLocaleString('id-ID')}/bln)</span>
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-slate-500">
+                      <span>Total Bunga ({(monthlyRate * 100).toFixed(1)}%/bln):</span>
+                      <span className="font-medium text-slate-700">
+                        Rp {calcHpOnlyBase.totalInterest.toLocaleString('id-ID')} <span className="text-[10px] text-slate-400">(Rp {Math.round(calcHpOnlyBase.totalInterest/tenor).toLocaleString('id-ID')}/bln)</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Bagian Paket Lengkap */}
+                  <div className="pt-2 border-t border-dashed border-slate-200">
+                    <h5 className="font-bold text-emerald-800 border-b border-emerald-50 pb-1 mb-1.5">Rincian Opsi 2 (Paket Lengkap):</h5>
+                    <div className="flex justify-between text-slate-500">
+                      <span>Total Harga Barang:</span>
+                      <span className="font-medium text-slate-700">Rp {totalBundlePrice.toLocaleString('id-ID')}</span>
+                    </div>
+                    <div className="flex justify-between text-slate-500">
+                      <span>Biaya Admin ({platform === 'Kredivo' ? '2%' : 'Flat'}):</span>
+                      <span className="font-medium text-slate-700">
+                        Rp {bundleAdmin.toLocaleString('id-ID')} <span className="text-[10px] text-slate-400">(Rp {Math.round(bundleAdmin/tenor).toLocaleString('id-ID')}/bln)</span>
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-slate-500">
+                      <span>Total Bunga ({(monthlyRate * 100).toFixed(1)}%/bln):</span>
+                      <span className="font-medium text-slate-700">
+                        Rp {calcBundleBase.totalInterest.toLocaleString('id-ID')} <span className="text-[10px] text-slate-400">(Rp {Math.round(calcBundleBase.totalInterest/tenor).toLocaleString('id-ID')}/bln)</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Highlight Selisih */}
+                  <div className="pt-2.5 border-t-2 border-slate-100 flex justify-between items-center text-slate-700 font-bold text-xs">
+                    <span>Selisih Angsuran Paket:</span>
+                    <span className="text-emerald-600 font-black">
+                      + Rp {(bundleMonthlyInstallment - hpOnlyMonthlyInstallment).toLocaleString('id-ID')} / bln
+                    </span>
+                  </div>
+
+                </div>
+
+                <div className="text-center text-[10px] text-slate-400 italic">
+                  *Rincian biaya admin & bunga di atas otomatis sudah dibagi rata ke setiap bulan cicilan.
+                </div>
+
+              </div>
+            ) : (
+              <div className="h-full min-h-[260px] border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center p-6 text-center bg-white">
+                <span className="text-3xl mb-2 animate-bounce">📱</span>
+                <p className="text-xs font-semibold text-slate-400 italic max-w-[220px]">
+                  Silakan tentukan model smartphone di panel kiri untuk membuka lembar rincian simulasi lengkap.
+                </p>
+              </div>
+            )}
+
+            {/* LIVE FOOTER STATUS */}
+            <div className="pt-3 border-t border-slate-200/60 flex justify-between items-center text-[10px] text-slate-400">
+              <span>Engine Status: <strong className="text-emerald-600">Admin Split Mode</strong></span>
+              <span className="font-bold text-slate-500">v3.2 - Live</span>
+            </div>
+
+          </div>
+
+        </div>
+
       </div>
-    </main>
+    </div>
   );
 }
