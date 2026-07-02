@@ -13,21 +13,21 @@ import { PlatformType } from './types/financing';
 import { calculateFinancing } from './Engine/FinancingEngine';
 
 // =========================================================================
-// 2. IMPORT KOMPONEN UI (Menggunakan Jalur Absolut `@/` Biar Pasti Valid)
+// 2. IMPORT KOMPONEN UI (Menggunakan Jalur Huruf Kecil/Lowercase)
 // =========================================================================
-import MainLayout from '@/components/layout/mainlayout';
-import Header from '@/components/layout/header';
-import Money from '@/components/common/money';
-import SectionTitle from '@/components/common/sectiontittle';
+import MainLayout from './components/layout/mainlayout';
+import Header from './components/layout/header';
+import Money from './components/common/money';
+import SectionTitle from './components/common/sectiontittle';
 
-import PlatformSelector from '@/components/selector/platformselector';
-import SearchableSelect from '@/components/search/searchableselect';
-import OppoCareSelector from '@/components/selector/oppocareselector';
-import IotSelector from '@/components/selector/iotselector';
-import TenorSelector from '@/components/selector/tenorselector';
+import PlatformSelector from './components/selector/platformselector';
+import SearchableSelect from './components/search/searchableselect';
+import OppoCareSelector from './components/selector/oppocareselector';
+import IotSelector from './components/selector/iotselector';
+import TenorSelector from './components/selector/tenorselector';
 
-import HpOnlyCard from '@/components/result/hponlycard';
-import SmartBundleCard from '@/components/result/smartbundlecard';
+import HpOnlyCard from './components/result/hponlycard';
+import SmartBundleCard from './components/result/smartbundlecard';
 
 // =========================================================================
 // 3. MAIN APPLICATION COMPONENT
@@ -96,15 +96,12 @@ ${isBundle ? `• *Proteksi:* ${currentOppoCare?.model}\n• *Bonus IoT:* ${curr
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* =================================================================
-            KOLOM 1: PARAMETER PANEL INPUT
-           ================================================================= */}
+        {/* KOLOM 1: PARAMETER PANEL INPUT */}
         <div className="space-y-4 lg:col-span-1">
           <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Panel Parameter</span>
           
           <PlatformSelector value={platform} onChange={setPlatform} />
           
-          {/* Dropdown Pencarian Otomatis */}
           <SearchableSelect products={HP_PRODUCTS} selectedValue={selectedModel} onChange={setSelectedModel} />
           
           {/* INPUT MANUAL DOWN PAYMENT (DP) */}
@@ -130,9 +127,7 @@ ${isBundle ? `• *Proteksi:* ${currentOppoCare?.model}\n• *Bonus IoT:* ${curr
           <TenorSelector value={tenor} onChange={setTenor} />
         </div>
 
-        {/* =================================================================
-            KOLOM 2: LIVE COMPARISON REPORT CARD
-           ================================================================= */}
+        {/* KOLOM 2: LIVE COMPARISON REPORT CARD */}
         <div className="bg-slate-50/60 rounded-2xl p-4 border border-slate-100 lg:col-span-1 space-y-4 flex flex-col justify-between">
           <div>
             <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">Rincian Komparasi</span>
@@ -175,9 +170,7 @@ ${isBundle ? `• *Proteksi:* ${currentOppoCare?.model}\n• *Bonus IoT:* ${curr
           <div className="text-[10px] text-slate-400 text-center italic border-t pt-2">Engine System v3.8 - Excel Sync Approved</div>
         </div>
 
-        {/* =================================================================
-            KOLOM 3: LIVE PREVIEW & INSTANT WHATSAPP SHARE
-           ================================================================= */}
+        {/* KOLOM 3: LIVE PREVIEW & INSTANT WHATSAPP SHARE */}
         <div className="lg:col-span-1 flex flex-col justify-between">
           <div>
             <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">Live Preview Struk</span>
@@ -233,12 +226,6 @@ ${isBundle ? `• *Proteksi:* ${currentOppoCare?.model}\n• *Bonus IoT:* ${curr
               </div>
             )}
           </div>
-
-          {currentHp && (
-            <p className="text-[10px] text-slate-400 text-center leading-tight font-medium mt-3">
-              🚀 Fitur pencarian otomatis urut abjad dan pemotongan DP manual berhasil diaktifkan secara presisi!
-            </p>
-          )}
         </div>
 
       </div>
