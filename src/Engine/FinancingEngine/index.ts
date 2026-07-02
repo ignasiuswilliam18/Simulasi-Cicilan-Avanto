@@ -1,36 +1,34 @@
 import { PlatformType, CalculationResult } from '../types/financing';
 
-const MONTHLY_RATE = 0.0375; 
+// Suku bunga disinkronkan 100% dengan formula bar Excel Anda (2.99%)
+const MONTHLY_RATE = 0.0299; 
 
-/**
- * Menghitung simulasi kredit berdasarkan harga barang, platform, tenor, dan DP manual
- */
 export function calculateFinancing(
   basePrice: number,
   platform: PlatformType,
   tenor: number,
-  downPayment: number = 0 // Tambahan parameter DP manual
+  downPayment: number = 0
 ): CalculationResult {
-  // Pokok utang adalah harga barang dikurangi uang muka (DP)
+  // Pokok utang dikurangi DP (Uang Muka) secara manual
   const netPrice = Math.max(0, basePrice - downPayment);
 
   if (netPrice <= 0) {
     return { adminTotal: 0, principalWithAdmin: 0, interestTotal: 0, totalLoan: 0, monthlyInstallment: 0 };
   }
 
-  // 1. Hitung nominal admin berdasarkan aturan platform dari harga NET setelah DP
+  // Kredivo = 2% dari sisa pokok, YesssCredit = Flat Rp 60.000
   const adminTotal = platform === 'Kredivo' ? Math.round(netPrice * 0.02) : 60000;
 
-  // 2. Pokok Pinjaman setelah digabung admin
+  // Pokok pinjaman setelah kapitalisasi admin
   const principalWithAdmin = netPrice + adminTotal;
 
-  // 3. Hitung total bunga berdasarkan tenor bulanan
+  // Total bunga berjalannya
   const interestTotal = Math.round(principalWithAdmin * MONTHLY_RATE * tenor);
 
-  // 4. Total pengembalian keseluruhan
+  // Total keseluruhan pinjaman pembeli
   const totalLoan = principalWithAdmin + interestTotal;
 
-  // 5. Pembagian angsuran per bulan
+  // Angsuran final per bulan
   const monthlyInstallment = Math.round(totalLoan / tenor);
 
   return {

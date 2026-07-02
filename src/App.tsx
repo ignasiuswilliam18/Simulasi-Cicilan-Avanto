@@ -35,7 +35,7 @@ export default function App() {
   const [selectedOppoCare, setSelectedOppoCare] = useState(0); 
   const [selectedIot, setSelectedIot] = useState(0); 
   const [tenor, setTenor] = useState<number>(3); 
-  const [downPayment, setDownPayment] = useState<number>(0); // State DP manual
+  const [downPayment, setDownPayment] = useState<number>(0); 
   const [copied, setCopied] = useState(false);
 
   // Mengambil item produk berdasarkan pilihan state
@@ -50,7 +50,7 @@ export default function App() {
   
   const totalBundlePrice = hpPrice + oppoCarePrice + iotPrice;
 
-  // Hitung Opsi dengan memotong Uang Muka / DP manual
+  // Hitung Opsi 1 (HP Saja) & Opsi 2 (Paket Lengkap) via Modular Finance Engine
   const hpResult = calculateFinancing(hpPrice, platform, tenor, downPayment);
   const bundleResult = calculateFinancing(totalBundlePrice, platform, tenor, downPayment);
 
@@ -92,39 +92,38 @@ ${isBundle ? `• *Proteksi:* ${currentOppoCare?.model}\n• *Bonus IoT:* ${curr
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* KOLOM KIRI: PANEL PARAMETER */}
+        {/* KOLOM KIRI: INPUT PARAMETERS PANEL */}
         <div className="space-y-4 lg:col-span-1">
           <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Panel Parameter</span>
           
           <PlatformSelector value={platform} onChange={setPlatform} />
           
-          {/* Menggunakan Searchable & Auto-Sorted Select */}
           <SearchableSelect products={HP_PRODUCTS} selectedValue={selectedModel} onChange={setSelectedModel} />
           
-          {/* INPUT DP MANUAL */}
-          <div>
-            <SectionTitle>3. Masukkan DP Manual (Rp)</SectionTitle>
+          {/* TEMPAT INPUT MANUAL DOWN PAYMENT (DP) */}
+          <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/60">
+            <SectionTitle>3. Input Uang Muka / DP Manual (Rp)</SectionTitle>
             <input
               type="number"
               min="0"
-              placeholder="Masukkan nominal DP (Contoh: 500000)"
+              placeholder="Contoh: 1000000"
               value={downPayment || ''}
               onChange={(e) => setDownPayment(Math.max(0, Number(e.target.value)))}
-              className="w-full bg-slate-50 border border-slate-200 text-slate-800 font-semibold rounded-xl px-3 py-3 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-50"
+              className="w-full bg-white border border-slate-200 text-slate-800 font-bold rounded-xl px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-50"
             />
             {downPayment > 0 && (
-              <p className="text-[10px] text-emerald-600 font-bold mt-1">
+              <div className="text-[10px] text-emerald-600 font-extrabold mt-1">
                 Terbaca: <Money amount={downPayment} />
-              </p>
+              </div>
             )}
           </div>
 
           <OppoCareSelector products={OPPO_CARE_PRODUCTS} value={selectedOppoCare} onChange={setSelectedOppoCare} />
           <IotSelector products={IOT_PRODUCTS} value={selectedIot} onChange={setSelectedIot} />
-          <TenorSelector value={tenor} onChange={setLenor => setTenor(tenor)} />
+          <TenorSelector value={tenor} onChange={setTenor} />
         </div>
 
-        {/* KOLOM TENGAH: RINCIAN KOMPARASI */}
+        {/* KOLOM TENGAH: LIVE COMPARISON REPORT CARD */}
         <div className="bg-slate-50/60 rounded-2xl p-4 border border-slate-100 lg:col-span-1 space-y-4 flex flex-col justify-between">
           <div>
             <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">Rincian Komparasi</span>
@@ -135,17 +134,18 @@ ${isBundle ? `• *Proteksi:* ${currentOppoCare?.model}\n• *Bonus IoT:* ${curr
                 <HpOnlyCard modelName={currentHp.model} result={hpResult} />
                 <SmartBundleCard modelName={currentHp.model} result={bundleResult} />
 
+                {/* Transparansi Biaya Finansial Singkat */}
                 <div className="bg-white border rounded-xl p-3 space-y-1 text-slate-500">
                   <div className="flex justify-between">
                     <span>Harga Pokok Gabungan:</span>
                     <span className="font-bold text-slate-700"><Money amount={totalBundlePrice} /></span>
                   </div>
-                  <div className="flex justify-between text-red-600 font-medium">
-                    <span>Potongan Uang Muka (DP):</span>
+                  <div className="flex justify-between text-red-600 font-semibold">
+                    <span>Potongan DP Manual:</span>
                     <span>-<Money amount={downPayment} /></span>
                   </div>
-                  <div className="flex justify-between border-t border-dashed pt-1 mt-1 font-bold text-slate-800">
-                    <span>Sisa Pokok Dibiayai:</span>
+                  <div className="flex justify-between border-t border-dashed pt-1 mt-1 font-black text-slate-800 text-[12px]">
+                    <span>Sisa Pokok Kredit:</span>
                     <span><Money amount={Math.max(0, totalBundlePrice - downPayment)} /></span>
                   </div>
                   <div className="flex justify-between pt-1">
@@ -153,7 +153,7 @@ ${isBundle ? `• *Proteksi:* ${currentOppoCare?.model}\n• *Bonus IoT:* ${curr
                     <span className="font-bold text-slate-700"><Money amount={bundleResult.adminTotal} /></span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Total Beban Bunga Flat:</span>
+                    <span>Total Beban Bunga Excel (2.99%):</span>
                     <span className="font-bold text-slate-700"><Money amount={bundleResult.interestTotal} /></span>
                   </div>
                 </div>
@@ -163,10 +163,10 @@ ${isBundle ? `• *Proteksi:* ${currentOppoCare?.model}\n• *Bonus IoT:* ${curr
               <p className="text-xs italic text-slate-400 text-center pt-8">Silakan tentukan parameter smartphone di panel kiri.</p>
             )}
           </div>
-          <div className="text-[10px] text-slate-400 text-center italic border-t pt-2">Engine System v3.7 DP-Enabled</div>
+          <div className="text-[10px] text-slate-400 text-center italic border-t pt-2">Engine System v3.8 - Excel Sync Approved</div>
         </div>
 
-        {/* KOLOM KANAN: LIVE PREVIEW & STRUK */}
+        {/* KOLOM KANAN: LIVE PREVIEW & INSTANT WHATSAPP SHARE */}
         <div className="lg:col-span-1 flex flex-col justify-between">
           <div>
             <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">Live Preview Struk</span>
@@ -196,6 +196,7 @@ ${isBundle ? `• *Proteksi:* ${currentOppoCare?.model}\n• *Bonus IoT:* ${curr
                   </div>
                 </div>
 
+                {/* Aksi Salin Teks Struk */}
                 <div className="pt-2 grid grid-cols-1 gap-2 font-sans">
                   <button
                     type="button"
@@ -225,7 +226,7 @@ ${isBundle ? `• *Proteksi:* ${currentOppoCare?.model}\n• *Bonus IoT:* ${curr
 
           {currentHp && (
             <p className="text-[10px] text-slate-400 text-center leading-tight font-medium mt-3">
-              🚀 Fitur pencarian otomatis urut abjad dan pemotongan DP manual berhasil diaktifkan secara presisi!
+              🚀 Kolom DP Manual sudah diaktifkan di panel kiri, dan bunga 2.99% sudah dikunci presisi dengan lembar hitung Excel Anda!
             </p>
           )}
         </div>
