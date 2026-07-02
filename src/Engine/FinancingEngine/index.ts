@@ -1,51 +1,40 @@
-// Interface untuk input data simulasi
-export interface CalculationInput {
-  price: number;        // Harga barang/HP
-  downPayment: number;  // Uang muka (DP)
-  tenor: number;        // Tenor dalam bulan (3, 6, 9, 12, dst)
-  interestRate: number; // Suku bunga per tahun (misal 0.12 untuk 12%)
-}
+import { PlatformType, CalculationResult } from '../types/financing';
 
-// Interface untuk hasil kalkulasi yang akan dikembalikan ke UI
-export interface CalculationResult {
-  principalLoan: number;    // Pokok hutang (Harga - DP)
-  totalInterest: number;    // Total bunga selama masa tenor
-  totalPayback: number;     // Total yang harus dibayar (Pokok + Bunga)
-  monthlyInstallment: number; // Cicilan bulanan
-}
+const MONTHLY_RATE = 0.0375; // Suku bunga flat 3.75%
 
 /**
- * Fungsi Utama untuk Menghitung Cicilan Pembiayaan Avanto (Flat Rate)
+ * Menghitung simulasi kredit berdasarkan harga barang, platform, dan tenor
  */
-export function calculateFinancing(input: CalculationInput): CalculationResult {
-  const { price, downPayment, tenor, interestRate } = input;
-
-  // 1. Hitung Pokok Hutang (Pembiayaan yang diajukan)
-  const principalLoan = Math.max(0, price - downPayment);
-
-  if (principalLoan === 0 || tenor <= 0) {
-    return {
-      principalLoan: 0,
-      totalInterest: 0,
-      totalPayback: 0,
-      monthlyInstallment: 0,
-    };
+export function calculateFinancing(
+  basePrice: number,
+  platform: PlatformType,
+  tenor: number
+): CalculationResult {
+  if (basePrice <= 0) {
+    return { adminTotal: 0, principalWithAdmin: 0, interestTotal: 0, totalLoan: 0, monthlyInstallment: 0 };
   }
 
-  // 2. Hitung Bunga per Bulan (Menggunakan metode Flat per tahun digeser ke bulan)
-  const monthlyRate = interestRate / 12;
-  const totalInterest = principalLoan * monthlyRate * tenor;
+  // 1. Hitung nominal admin berdasarkan aturan platform
+  // Kredivo = 2% dari harga barang, YesssCredit = Flat Rp 60.000
+  const adminTotal = platform === 'Kredivo' ? Math.round(basePrice * 0.02) : 60000;
 
-  // 3. Total Hutang Keseluruhan (Pokok + Bunga)
-  const totalPayback = principalLoan + totalInterest;
+  // 2. Pokok Pinjaman setelah digabung admin (Sistem Kapitalisasi)
+  const principalWithAdmin = basePrice + adminTotal;
 
-  // 4. Cicilan per bulan
-  const monthlyInstallment = Math.round(totalPayback / tenor);
+  // 3. Hitung total bunga berdasarkan tenor bulanan
+  const interestTotal = Math.round(principalWithAdmin * MONTHLY_RATE * tenor);
+
+  // 4. Total pengembalian keseluruhan
+  const totalLoan = principalWithAdmin + interestTotal;
+
+  // 5. Pembagian angsuran per bulan
+  const monthlyInstallment = Math.round(totalLoan / tenor);
 
   return {
-    principalLoan,
-    totalInterest: Math.round(totalInterest),
-    totalPayback: Math.round(totalPayback),
+    adminTotal,
+    principalWithAdmin,
+    interestTotal,
+    totalLoan,
     monthlyInstallment,
   };
 }
