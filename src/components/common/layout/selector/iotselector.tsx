@@ -1,5 +1,5 @@
 import { ProductItem } from '../../types/financing';
-import SectionTitle from '../common/SectionTitle';
+import SectionTitle from '../../../../components/common/sectiontittle';
 
 interface IotSelectorProps {
   products: ProductItem[];

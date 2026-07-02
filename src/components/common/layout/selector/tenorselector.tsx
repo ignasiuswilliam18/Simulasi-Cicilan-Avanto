@@ -1,4 +1,4 @@
-import SectionTitle from '../common/SectionTitle';
+import SectionTitle from '../../../common/sectiontittle';
 
 interface TenorSelectorProps {
   value: number;

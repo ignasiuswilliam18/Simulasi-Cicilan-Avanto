@@ -1,5 +1,5 @@
-import { CalculationResult } from '../../types/financing';
-import Money from '../common/Money';
+import { CalculationResult } from '../../../../../../types/financing';
+import Money from '../../../../../components/common/money';
 
 interface HpOnlyCardProps {
   modelName: string;
