@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
-import { ProductItem } from '../types/financing';
-import SectionTitle from './common/sectiontittle';
+import { ProductItem } from '@/types/financing';
+import SectionTitle from '@/components/common/sectiontittle';
 interface SearchableSelectProps {
   products: ProductItem[];
   selectedValue: string;

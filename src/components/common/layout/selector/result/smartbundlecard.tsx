@@ -1,5 +1,5 @@
-import { CalculationResult } from '../../../../../../types/financing';
-import Money from '../../../../../components/common/money';
+import { CalculationResult } from '@/types/financing';
+import Money from '@/components/common/money';
 interface SmartBundleCardProps {
   modelName: string;
   result: CalculationResult;

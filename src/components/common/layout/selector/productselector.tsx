@@ -1,5 +1,5 @@
-import { ProductType } from '../../../../../types/financing'; // sesuaikan nama type jika berbeda
-import SectionTitle from '../../../../components/common/sectiontittle';
+import { ProductItem } from '@/types/financing';
+import SectionTitle from '@/components/common/sectiontittle';
 interface ProductSelectorProps {
   products: ProductItem[];
   value: string;
