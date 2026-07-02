@@ -1,25 +1,28 @@
 import { PlatformType, CalculationResult } from '../types/financing';
 
-const MONTHLY_RATE = 0.0375; // Suku bunga flat 3.75%
+const MONTHLY_RATE = 0.0375; 
 
 /**
- * Menghitung simulasi kredit berdasarkan harga barang, platform, dan tenor
+ * Menghitung simulasi kredit berdasarkan harga barang, platform, tenor, dan DP manual
  */
 export function calculateFinancing(
   basePrice: number,
   platform: PlatformType,
-  tenor: number
+  tenor: number,
+  downPayment: number = 0 // Tambahan parameter DP manual
 ): CalculationResult {
-  if (basePrice <= 0) {
+  // Pokok utang adalah harga barang dikurangi uang muka (DP)
+  const netPrice = Math.max(0, basePrice - downPayment);
+
+  if (netPrice <= 0) {
     return { adminTotal: 0, principalWithAdmin: 0, interestTotal: 0, totalLoan: 0, monthlyInstallment: 0 };
   }
 
-  // 1. Hitung nominal admin berdasarkan aturan platform
-  // Kredivo = 2% dari harga barang, YesssCredit = Flat Rp 60.000
-  const adminTotal = platform === 'Kredivo' ? Math.round(basePrice * 0.02) : 60000;
+  // 1. Hitung nominal admin berdasarkan aturan platform dari harga NET setelah DP
+  const adminTotal = platform === 'Kredivo' ? Math.round(netPrice * 0.02) : 60000;
 
-  // 2. Pokok Pinjaman setelah digabung admin (Sistem Kapitalisasi)
-  const principalWithAdmin = basePrice + adminTotal;
+  // 2. Pokok Pinjaman setelah digabung admin
+  const principalWithAdmin = netPrice + adminTotal;
 
   // 3. Hitung total bunga berdasarkan tenor bulanan
   const interestTotal = Math.round(principalWithAdmin * MONTHLY_RATE * tenor);

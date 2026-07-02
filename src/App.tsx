@@ -15,10 +15,11 @@ import { calculateFinancing } from './Engine/financeengine';
 import MainLayout from './components/layout/MainLayout';
 import Header from './components/layout/Header';
 import Money from './components/common/Money';
+import SectionTitle from './components/common/SectionTitle';
 
-// Import Komponen Selector Input
+// Import Komponen Selector Input & Search
 import PlatformSelector from './components/selector/PlatformSelector';
-import ProductSelector from './components/selector/ProductSelector';
+import SearchableSelect from './components/search/SearchableSelect';
 import OppoCareSelector from './components/selector/OppoCareSelector';
 import IotSelector from './components/selector/IotSelector';
 import TenorSelector from './components/selector/TenorSelector';
@@ -34,6 +35,7 @@ export default function App() {
   const [selectedOppoCare, setSelectedOppoCare] = useState(0); 
   const [selectedIot, setSelectedIot] = useState(0); 
   const [tenor, setTenor] = useState<number>(3); 
+  const [downPayment, setDownPayment] = useState<number>(0); // State DP manual
   const [copied, setCopied] = useState(false);
 
   // Mengambil item produk berdasarkan pilihan state
@@ -48,9 +50,9 @@ export default function App() {
   
   const totalBundlePrice = hpPrice + oppoCarePrice + iotPrice;
 
-  // Hitung Opsi 1 (HP Saja) & Opsi 2 (Paket Lengkap) via Modular Finance Engine
-  const hpResult = calculateFinancing(hpPrice, platform, tenor);
-  const bundleResult = calculateFinancing(totalBundlePrice, platform, tenor);
+  // Hitung Opsi dengan memotong Uang Muka / DP manual
+  const hpResult = calculateFinancing(hpPrice, platform, tenor, downPayment);
+  const bundleResult = calculateFinancing(totalBundlePrice, platform, tenor, downPayment);
 
   // ================= LOGIKA SHARE / COPY STRUK =================
   const handleCopyStruk = (type: 'hpsaja' | 'paketlengkap') => {
@@ -70,6 +72,7 @@ ${isBundle ? `• *Proteksi:* ${currentOppoCare?.model}\n• *Bonus IoT:* ${curr
 -------------------------------------
 ⚙️ *Skema Angsuran (Avanto by ${platform})*
 -------------------------------------
+• *Uang Muka (DP):* Rp ${downPayment.toLocaleString('id-ID')}
 • *Masa Tenor:* ${tenor} Bulan
 • *CICILAN BULANAN:* Rp ${installment.toLocaleString('id-ID')} / bln
 
@@ -87,21 +90,41 @@ ${isBundle ? `• *Proteksi:* ${currentOppoCare?.model}\n• *Bonus IoT:* ${curr
     <MainLayout>
       <Header />
 
-      {/* THREE-COLUMN ADAPTIVE GRID SYSTEMS */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* KOLOM KIRI: INPUT PARAMETERS PANEL */}
+        {/* KOLOM KIRI: PANEL PARAMETER */}
         <div className="space-y-4 lg:col-span-1">
           <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Panel Parameter</span>
           
           <PlatformSelector value={platform} onChange={setPlatform} />
-          <ProductSelector products={HP_PRODUCTS} value={selectedModel} onChange={setSelectedModel} />
+          
+          {/* Menggunakan Searchable & Auto-Sorted Select */}
+          <SearchableSelect products={HP_PRODUCTS} selectedValue={selectedModel} onChange={setSelectedModel} />
+          
+          {/* INPUT DP MANUAL */}
+          <div>
+            <SectionTitle>3. Masukkan DP Manual (Rp)</SectionTitle>
+            <input
+              type="number"
+              min="0"
+              placeholder="Masukkan nominal DP (Contoh: 500000)"
+              value={downPayment || ''}
+              onChange={(e) => setDownPayment(Math.max(0, Number(e.target.value)))}
+              className="w-full bg-slate-50 border border-slate-200 text-slate-800 font-semibold rounded-xl px-3 py-3 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-50"
+            />
+            {downPayment > 0 && (
+              <p className="text-[10px] text-emerald-600 font-bold mt-1">
+                Terbaca: <Money amount={downPayment} />
+              </p>
+            )}
+          </div>
+
           <OppoCareSelector products={OPPO_CARE_PRODUCTS} value={selectedOppoCare} onChange={setSelectedOppoCare} />
           <IotSelector products={IOT_PRODUCTS} value={selectedIot} onChange={setSelectedIot} />
-          <TenorSelector value={tenor} onChange={setTenor} />
+          <TenorSelector value={tenor} onChange={setLenor => setTenor(tenor)} />
         </div>
 
-        {/* KOLOM TENGAH: LIVE COMPARISON REPORT CARD */}
+        {/* KOLOM TENGAH: RINCIAN KOMPARASI */}
         <div className="bg-slate-50/60 rounded-2xl p-4 border border-slate-100 lg:col-span-1 space-y-4 flex flex-col justify-between">
           <div>
             <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">Rincian Komparasi</span>
@@ -109,22 +132,28 @@ ${isBundle ? `• *Proteksi:* ${currentOppoCare?.model}\n• *Bonus IoT:* ${curr
             {currentHp && currentHp.price > 0 ? (
               <div className="space-y-3 text-[11px]">
                 
-                {/* Tampilan Kartu Hasil Opsi */}
                 <HpOnlyCard modelName={currentHp.model} result={hpResult} />
                 <SmartBundleCard modelName={currentHp.model} result={bundleResult} />
 
-                {/* Transparansi Biaya Finansial Singkat */}
                 <div className="bg-white border rounded-xl p-3 space-y-1 text-slate-500">
                   <div className="flex justify-between">
                     <span>Harga Pokok Gabungan:</span>
                     <span className="font-bold text-slate-700"><Money amount={totalBundlePrice} /></span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between text-red-600 font-medium">
+                    <span>Potongan Uang Muka (DP):</span>
+                    <span>-<Money amount={downPayment} /></span>
+                  </div>
+                  <div className="flex justify-between border-t border-dashed pt-1 mt-1 font-bold text-slate-800">
+                    <span>Sisa Pokok Dibiayai:</span>
+                    <span><Money amount={Math.max(0, totalBundlePrice - downPayment)} /></span>
+                  </div>
+                  <div className="flex justify-between pt-1">
                     <span>Biaya Admin Terkapitalisasi:</span>
                     <span className="font-bold text-slate-700"><Money amount={bundleResult.adminTotal} /></span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Total Beban Bunga ({platform === 'Kredivo' ? '2% Base' : 'Flat'}):</span>
+                    <span>Total Beban Bunga Flat:</span>
                     <span className="font-bold text-slate-700"><Money amount={bundleResult.interestTotal} /></span>
                   </div>
                 </div>
@@ -134,10 +163,10 @@ ${isBundle ? `• *Proteksi:* ${currentOppoCare?.model}\n• *Bonus IoT:* ${curr
               <p className="text-xs italic text-slate-400 text-center pt-8">Silakan tentukan parameter smartphone di panel kiri.</p>
             )}
           </div>
-          <div className="text-[10px] text-slate-400 text-center italic border-t pt-2">Engine System v3.6 Optimized</div>
+          <div className="text-[10px] text-slate-400 text-center italic border-t pt-2">Engine System v3.7 DP-Enabled</div>
         </div>
 
-        {/* KOLOM KANAN: LIVE PREVIEW & INSTANT WHATSAPP SHARE */}
+        {/* KOLOM KANAN: LIVE PREVIEW & STRUK */}
         <div className="lg:col-span-1 flex flex-col justify-between">
           <div>
             <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">Live Preview Struk</span>
@@ -158,6 +187,7 @@ ${isBundle ? `• *Proteksi:* ${currentOppoCare?.model}\n• *Bonus IoT:* ${curr
                 </div>
 
                 <div className="border-t border-dashed border-amber-300 pt-3 space-y-1">
+                  <div>DP    : Rp {downPayment.toLocaleString('id-ID')}</div>
                   <div>MITRA : Avanto by {platform}</div>
                   <div>TENOR : {tenor} BULAN</div>
                   <div className="text-xs font-bold bg-amber-100 p-1.5 rounded mt-2 flex justify-between">
@@ -166,7 +196,6 @@ ${isBundle ? `• *Proteksi:* ${currentOppoCare?.model}\n• *Bonus IoT:* ${curr
                   </div>
                 </div>
 
-                {/* Aksi Salin Teks Struk */}
                 <div className="pt-2 grid grid-cols-1 gap-2 font-sans">
                   <button
                     type="button"
@@ -196,7 +225,7 @@ ${isBundle ? `• *Proteksi:* ${currentOppoCare?.model}\n• *Bonus IoT:* ${curr
 
           {currentHp && (
             <p className="text-[10px] text-slate-400 text-center leading-tight font-medium mt-3">
-              🚀 Siap dikirim! Klik salin lalu langsung lakukan tempel teks (Paste) ke ruang obrolan chat pembeli.
+              🚀 Fitur pencarian otomatis urut abjad dan pemotongan DP manual berhasil diaktifkan secara presisi!
             </p>
           )}
         </div>
