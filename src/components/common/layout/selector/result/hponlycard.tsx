@@ -1,4 +1,4 @@
-import { FinancingResult } from '@/types/financing';
+import { FinancingResult } from '../../../../../../types/financing';
 
 interface HpOnlyCardProps {
   modelName: string;

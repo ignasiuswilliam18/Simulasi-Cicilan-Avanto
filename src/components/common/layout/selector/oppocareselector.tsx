@@ -1,5 +1,5 @@
-import SectionTitle from '@/components/common/sectiontittle';
-import { ProductItem } from '@/types/financing';
+import SectionTitle from '../../sectiontittle';
+import { ProductItem } from '../../../../../types/financing';
 
 interface OppoCareSelectorProps {
   products: ProductItem[];

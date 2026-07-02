@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
-import { ProductItem } from '@/types/financing';
-import SectionTitle from '@/components/common/sectiontittle';
+import { ProductItem } from '../types/financing';
+import SectionTitle from './common/sectiontittle';
 
 interface SearchableSelectProps {
   products: ProductItem[];

@@ -1,5 +1,5 @@
-import { PlatformType } from '@/types/financing';
-import SectionTitle from '@/components/common/sectiontittle';
+import { PlatformType } from '../../../../../types/financing';
+import SectionTitle from '../../sectiontittle';
 
 interface PlatformSelectorProps {
   value: PlatformType;
