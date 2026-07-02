@@ -13,21 +13,21 @@ import { PlatformType } from './types/financing';
 import { calculateFinancing } from './Engine/FinancingEngine';
 
 // =========================================================================
-// 2. IMPORT KOMPONEN UI (Menggunakan Jalur Huruf Kecil/Lowercase)
+// 2. IMPORT KOMPONEN UI (Sesuai Struktur Nested Folder Log Vercel)
 // =========================================================================
-import MainLayout from './components/layout/mainlayout';
-import Header from './components/layout/header';
+import MainLayout from './components/common/layout/mainlayout';
+import Header from './components/common/layout/header';
 import Money from './components/common/money';
 import SectionTitle from './components/common/sectiontittle';
 
-import PlatformSelector from './components/selector/platformselector';
-import SearchableSelect from './components/search/searchableselect';
-import OppoCareSelector from './components/selector/oppocareselector';
-import IotSelector from './components/selector/iotselector';
-import TenorSelector from './components/selector/tenorselector';
+import PlatformSelector from './components/common/layout/selector/platformselector';
+import SearchableSelect from './components/searchableselect';
+import OppoCareSelector from './components/common/layout/selector/oppocareselector';
+import IotSelector from './components/common/layout/selector/iotselector';
+import TenorSelector from './components/common/layout/selector/tenorselector';
 
-import HpOnlyCard from './components/result/hponlycard';
-import SmartBundleCard from './components/result/smartbundlecard';
+import HpOnlyCard from './components/common/layout/selector/result/hponlycard';
+import SmartBundleCard from './components/common/layout/selector/result/smartbundlecard';
 
 // =========================================================================
 // 3. MAIN APPLICATION COMPONENT
