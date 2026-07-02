@@ -1,22 +1,20 @@
-import { CalculationResult } from '../../../../../../types/financing';
-import Money from '../../../../../components/common/money';
+import { FinancingResult } from '@/types/financing';
 
 interface HpOnlyCardProps {
   modelName: string;
-  result: CalculationResult;
+  result: FinancingResult;
 }
 
 export default function HpOnlyCard({ modelName, result }: HpOnlyCardProps) {
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col justify-between shadow-sm">
-      <div>
-        <span className="text-[10px] font-extrabold text-slate-400 uppercase block">Opsi 1</span>
-        <h4 className="text-xs font-bold text-slate-700 mt-0.5">HP Saja</h4>
-        <p className="text-[9px] text-slate-400 mt-0.5 truncate">{modelName}</p>
-      </div>
-      <div className="mt-4 pt-2 border-t border-slate-100">
-        <span className="text-[9px] text-slate-400 block font-medium">Cicilan / bln:</span>
-        <Money amount={result.monthlyInstallment} className="text-sm font-bold text-slate-800" />
+    <div className="bg-white border border-slate-100 rounded-xl p-3 shadow-sm space-y-2">
+      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Opsi 1: Ponsel Saja</div>
+      <div className="font-bold text-slate-800 text-xs truncate">{modelName || 'Belum Pilih Unit'}</div>
+      <div className="flex justify-between items-baseline pt-1 border-t border-slate-50">
+        <span className="text-[10px] text-slate-500">Angsuran:</span>
+        <span className="font-extrabold text-slate-900 text-sm">
+          Rp {result.monthlyInstallment.toLocaleString('id-ID')} <span className="text-[9px] font-normal text-slate-400">/bln</span>
+        </span>
       </div>
     </div>
   );

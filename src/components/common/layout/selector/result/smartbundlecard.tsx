@@ -1,26 +1,24 @@
-import { CalculationResult } from '@/types/financing';
+import { FinancingResult } from '@/types/financing';
 import Money from '@/components/common/money';
+
 interface SmartBundleCardProps {
   modelName: string;
-  result: CalculationResult;
+  result: FinancingResult;
 }
 
 export default function SmartBundleCard({ modelName, result }: SmartBundleCardProps) {
   return (
-    <div className="bg-gradient-to-br from-emerald-50/30 to-white border-2 border-emerald-500 rounded-2xl p-4 flex flex-col justify-between shadow-lg shadow-emerald-50 relative overflow-hidden">
-      <div className="absolute top-0 right-0 bg-emerald-500 text-[8px] text-white font-black px-2 py-0.5 rounded-bl-xl uppercase tracking-wider">
-        Combo
+    <div className="bg-gradient-to-br from-emerald-500 to-teal-600 border border-emerald-500 rounded-xl p-3 shadow-sm space-y-2 text-white">
+      <div className="flex justify-between items-center">
+        <span className="text-[9px] font-bold uppercase tracking-wider bg-white/20 px-1.5 py-0.5 rounded text-emerald-50">Opsi 2: Paket Combo</span>
+        <span className="text-[9px] font-bold bg-amber-400 text-amber-950 px-1.5 py-0.5 rounded shadow-sm">REKOMENDASI</span>
       </div>
-      <div>
-        <span className="text-[10px] font-extrabold text-emerald-600 uppercase block">Opsi 2</span>
-        <h4 className="text-xs font-bold text-emerald-900 mt-0.5">Paket Lengkap</h4>
-        <p className="text-[9px] font-medium text-slate-500 mt-0.5 leading-tight truncate">
-          {modelName} Combo
-        </p>
-      </div>
-      <div className="mt-4 pt-2 border-t border-emerald-100">
-        <span className="text-[9px] text-emerald-700 block font-bold">Cicilan / bln:</span>
-        <Money amount={result.monthlyInstallment} className="text-base font-extrabold text-emerald-600" />
+      <div className="font-bold text-xs truncate">{modelName ? `${modelName} + Care + IoT` : 'Belum Pilih Unit'}</div>
+      <div className="flex justify-between items-baseline pt-1 border-t border-white/10">
+        <span className="text-[10px] text-emerald-100">Angsuran:</span>
+        <span className="font-black text-sm">
+          <Money amount={result.monthlyInstallment} /> <span className="text-[9px] font-normal text-emerald-200">/bln</span>
+        </span>
       </div>
     </div>
   );
