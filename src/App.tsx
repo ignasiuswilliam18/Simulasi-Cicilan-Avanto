@@ -35,7 +35,7 @@ export default function App() {
   const [selectedOppoCare, setSelectedOppoCare] = useState(0); 
   const [selectedIot, setSelectedIot] = useState(0); 
   const [tenor, setTenor] = useState<number>(3); 
-  const [downPayment, setDownPayment] = useState<number>(0); 
+  const [downPayment, setDownPayment] = useState<number>(0); // State untuk DP Manual
   const [copied, setCopied] = useState(false);
 
   // Mengambil item produk berdasarkan pilihan state
@@ -50,7 +50,7 @@ export default function App() {
   
   const totalBundlePrice = hpPrice + oppoCarePrice + iotPrice;
 
-  // Hitung Opsi 1 (HP Saja) & Opsi 2 (Paket Lengkap) via Modular Finance Engine
+  // Hitung Opsi 1 (HP Saja) & Opsi 2 (Paket Lengkap) via Modular Finance Engine dengan DP Manual
   const hpResult = calculateFinancing(hpPrice, platform, tenor, downPayment);
   const bundleResult = calculateFinancing(totalBundlePrice, platform, tenor, downPayment);
 
@@ -98,9 +98,10 @@ ${isBundle ? `• *Proteksi:* ${currentOppoCare?.model}\n• *Bonus IoT:* ${curr
           
           <PlatformSelector value={platform} onChange={setPlatform} />
           
+          {/* Komponen Dropdown Baru dengan Fitur Cari & Otomatis Urut Abjad */}
           <SearchableSelect products={HP_PRODUCTS} selectedValue={selectedModel} onChange={setSelectedModel} />
           
-          {/* TEMPAT INPUT MANUAL DOWN PAYMENT (DP) */}
+          {/* KOLOM INPUT DOWN PAYMENT (DP) MANUAL */}
           <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/60">
             <SectionTitle>3. Input Uang Muka / DP Manual (Rp)</SectionTitle>
             <input
@@ -226,7 +227,7 @@ ${isBundle ? `• *Proteksi:* ${currentOppoCare?.model}\n• *Bonus IoT:* ${curr
 
           {currentHp && (
             <p className="text-[10px] text-slate-400 text-center leading-tight font-medium mt-3">
-              🚀 Kolom DP Manual sudah diaktifkan di panel kiri, dan bunga 2.99% sudah dikunci presisi dengan lembar hitung Excel Anda!
+              🚀 Fitur pencarian otomatis urut abjad dan pemotongan DP manual berhasil diaktifkan secara presisi!
             </p>
           )}
         </div>
