@@ -328,7 +328,24 @@ ${_}
 
 WhatsApp:
 ${y}
-`;navigator.clipboard.writeText(a),alert(`Simulation copied`)}let ne={provider:e,providers:ue.map(e=>e.name),product:n,productOptions:de.map(e=>({label:e.model,value:e.model})),productPrice:ee.price,oppoCare:i,oppoCareOptions:pe.map(e=>e.model),iot:o,iotOptions:fe.map(e=>e.model),dp:c,tenor:p,promoterName:_,whatsapp:y};return(0,m.jsx)(`div`,{className:`\r
+`;navigator.clipboard.writeText(a),alert(`Simulation copied`)}let ne={provider:e,providers:ue.map(e=>e.name),product:n,productOptions:de.map(e=>({label:e.model,value:e.model})),productPrice:ee.price,oppoCare:i,oppoCareOptions:pe.map(e=>e.model),iot:o,iotOptions:fe.map(e=>e.model),dp:c,tenor:p,promoterName:_,whatsapp:y},re={setProvider:t,setProduct:r,setOppoCare:a,setIot:s,setDP:u,setTenor:g,setPromoterName:v,setWhatsapp:b};function ie(){let t=`
+AVANTO FINANCING SIMULATION
+
+Produk:
+${n}
+
+Provider:
+${e}
+
+Tenor:
+${p} Bulan
+
+Cicilan:
+Rp ${w.smartBundle.monthlyInstallment.toLocaleString(`id-ID`)}
+/ bulan
+
+Terima kasih.
+`,r=`https://wa.me/?text=`+encodeURIComponent(t);window.open(r,`_blank`)}return(0,m.jsx)(`div`,{className:`\r
 min-h-screen\r
 bg-slate-100\r
 `,children:(0,m.jsxs)(`div`,{className:`\r
@@ -347,7 +364,7 @@ gap-6\r
 \r
 xl:grid-cols-[320px_minmax(420px,1fr)_380px]\r
 \r
-`,children:[(0,m.jsx)(`div`,{children:(0,m.jsx)(T,{state:ne,actions:{setProvider:t,setProduct:r,setOppoCare:a,setIot:s,setDP:u,setTenor:g,setPromoterName:v,setWhatsapp:b}})}),(0,m.jsxs)(`div`,{className:`\r
+`,children:[(0,m.jsx)(`div`,{children:(0,m.jsx)(T,{state:ne,actions:re})}),(0,m.jsxs)(`div`,{className:`\r
 space-y-6\r
 `,children:[(0,m.jsx)(le,{provider:e,product:n,tenor:p,dp:c,hpOnly:w.hpOnly.monthlyInstallment,smartBundle:w.smartBundle.monthlyInstallment}),(0,m.jsx)(oe,{title:`HP ONLY`,icon:`📱`,providerName:e,productName:n,tenor:p,monthlyInstallment:w.hpOnly.monthlyInstallment,productPrice:w.hpOnly.totalPrice,downPayment:w.hpOnly.downPayment,financedAmount:w.hpOnly.principal,admin:w.hpOnly.adminFee,interest:w.hpOnly.interest,onCopy:()=>te(`HP ONLY`,w.hpOnly)}),(0,m.jsx)(oe,{title:`SMART BUNDLE`,icon:`🎁`,highlight:!0,providerName:e,productName:`${n}
 + ${i}
@@ -452,23 +469,16 @@ text-white\r
 \r
 hover:bg-slate-800\r
 \r
-`,children:`📸 Generate PNG Result`}),(0,m.jsx)(`button`,{className:`\r
+`,children:`📸 Generate PNG Result`}),(0,m.jsx)(`button`,{onClick:ie,className:`\r
 mt-3\r
-\r
 w-full\r
-\r
 rounded-2xl\r
-\r
 border\r
-\r
 border-slate-200\r
-\r
 py-3\r
-\r
 font-bold\r
-\r
 text-slate-700\r
-\r
+hover:bg-slate-50\r
 `,children:`📲 Share WhatsApp`})]})]})})]}),(0,m.jsx)(`footer`,{className:`\r
 mt-12\r
 \r
