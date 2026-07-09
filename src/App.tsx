@@ -1,234 +1,1421 @@
-import { useState } from 'react';
+import { useMemo, useState } from "react";
 
-// =========================================================================
-// 1. IMPORT DATA & CORE ENGINE
-// =========================================================================
-import { 
-  HP_PRODUCTS, 
-  OPPO_CARE_PRODUCTS, 
-  IOT_PRODUCTS 
-} from './data';
+import Header from "./components/layout/Header";
 
-import { PlatformType } from './types/financing';
-import { calculateFinancing } from './Engine/FinancingEngine';
+import SelectorPanel from "./components/selector/SelectorPanel";
 
-// =========================================================================
-// 2. IMPORT KOMPONEN UI (Sesuai Struktur Nested Folder Log Vercel)
-// =========================================================================
-import MainLayout from './components/common/layout/mainlayout';
-import Header from './components/common/layout/header';
-import Money from './components/common/money';
-import SectionTitle from './components/common/sectiontittle';
+import ResultCard from "./components/result/ResultCard";
+import SummaryCard from "./components/result/SummaryCard";
 
-import PlatformSelector from './components/common/layout/selector/platformselector';
-import SearchableSelect from './components/searchableselect';
-import OppoCareSelector from './components/common/layout/selector/oppocareselector';
-import IotSelector from './components/common/layout/selector/iotselector';
-import TenorSelector from './components/common/layout/selector/tenorselector';
 
-import HpOnlyCard from './components/common/layout/selector/result/hponlycard';
-import SmartBundleCard from './components/common/layout/selector/result/smartbundlecard';
+import oppoLogo from "./assets/logos/oppo.png";
+import kredivoLogo from "./assets/logos/kredivo.png";
+import yesssLogo from "./assets/logos/yessscredit.png";
+import avantoLogo from "./assets/logos/avanto.png";
 
-// =========================================================================
-// 3. MAIN APPLICATION COMPONENT
-// =========================================================================
+
+import {
+  HP_PRODUCTS,
+  OPPO_CARE_PRODUCTS,
+  IOT_PRODUCTS,
+  FINANCING_PROVIDERS,
+} from "./data";
+
+
+import {
+  calculateSimulation,
+} from "./engine/calculateSimulation";
+
+
+
 export default function App() {
-  // --- State Manajemen Simulator ---
-  const [platform, setPlatform] = useState<PlatformType>('Kredivo');
-  const [selectedModel, setSelectedModel] = useState('');
-  const [selectedOppoCare, setSelectedOppoCare] = useState(0); 
-  const [selectedIot, setSelectedIot] = useState(0); 
-  const [tenor, setTenor] = useState<number>(3); 
-  const [downPayment, setDownPayment] = useState<number>(0); // State DP Manual
-  const [copied, setCopied] = useState(false);
 
-  // Pencarian objek produk berdasarkan state terpilih
-  const currentHp = HP_PRODUCTS?.find((p) => p.model === selectedModel);
-  const currentOppoCare = OPPO_CARE_PRODUCTS?.[selectedOppoCare];
-  const currentIot = IOT_PRODUCTS?.[selectedIot];
 
-  // --- Ambil Variabel Harga Pokok ---
-  const hpPrice = currentHp && currentHp.price > 0 ? currentHp.price : 0;
-  const oppoCarePrice = currentOppoCare && currentOppoCare.price > 0 ? currentOppoCare.price : 0;
-  const iotPrice = currentIot && currentIot.price > 0 ? currentIot.price : 0;
-  
-  const totalBundlePrice = hpPrice + oppoCarePrice + iotPrice;
+  // ==========================
+  // STATE
+  // ==========================
 
-  // --- Eksekusi Modular Finansial Engine ---
-  const hpResult = calculateFinancing(hpPrice, platform, tenor, downPayment);
-  const bundleResult = calculateFinancing(totalBundlePrice, platform, tenor, downPayment);
 
-  // --- Logika Penyusunan Teks Struk untuk WhatsApp Share ---
-  const handleCopyStruk = (type: 'hpsaja' | 'paketlengkap') => {
-    const isBundle = type === 'paketlengkap';
-    const modelName = currentHp ? currentHp.model : '';
-    const installment = isBundle ? bundleResult.monthlyInstallment : hpResult.monthlyInstallment;
-    
-    const textStruk = `=====================================
-        BROSUR DIGITAL AVANTO       
-=====================================
-📋 *Rencana Pembiayaan Gadget*
+  const [provider,setProvider] =
+    useState(
+      FINANCING_PROVIDERS[0].name
+    );
 
-• *Tipe HP:* ${modelName}
-• *Opsi:* ${isBundle ? '📦 PAKET LENGKAP (Combo)' : '📱 HP Saja'}
-${isBundle ? `• *Proteksi:* ${currentOppoCare?.model}\n• *Bonus IoT:* ${currentIot?.model}` : ''}
 
--------------------------------------
-⚙️ *Skema Angsuran (Avanto by ${platform})*
--------------------------------------
-• *Uang Muka (DP):* Rp ${downPayment.toLocaleString('id-ID')}
-• *Masa Tenor:* ${tenor} Bulan
-• *CICILAN BULANAN:* Rp ${installment.toLocaleString('id-ID')} / bln
+  const [product,setProduct] =
+    useState(
+      HP_PRODUCTS[1].model
+    );
 
--------------------------------------
-💡 _Yuk, kunjungi OPPO Store terdekat untuk mengajukan limit proses cepat instant!_
-=====================================`;
 
-    navigator.clipboard.writeText(textStruk).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
+  const [oppoCare,setOppoCare] =
+    useState(
+      OPPO_CARE_PRODUCTS[0].model
+    );
+
+
+  const [iot,setIot] =
+    useState(
+      IOT_PRODUCTS[0].model
+    );
+
+
+  const [dp,setDP] =
+    useState(0);
+
+
+  const [tenor,setTenor] =
+    useState(3);
+
+
+  const [promoterName,setPromoterName] =
+    useState("");
+
+
+  const [whatsapp,setWhatsapp] =
+    useState("");
+
+
+
+
+
+  // ==========================
+  // LOOKUP
+  // ==========================
+
+
+  const currentProvider =
+    useMemo(
+      () =>
+        FINANCING_PROVIDERS.find(
+          item =>
+          item.name === provider
+        )!,
+      [provider]
+    );
+
+
+
+
+  const currentProduct =
+    useMemo(
+      () =>
+        HP_PRODUCTS.find(
+          item =>
+          item.model === product
+        )!,
+      [product]
+    );
+
+
+
+
+  const currentOppoCare =
+    useMemo(
+      () =>
+        OPPO_CARE_PRODUCTS.find(
+          item =>
+          item.model === oppoCare
+        ),
+      [oppoCare]
+    );
+
+
+
+
+  const currentIot =
+    useMemo(
+      () =>
+        IOT_PRODUCTS.find(
+          item =>
+          item.model === iot
+        ),
+      [iot]
+    );
+
+
+
+
+
+
+  // ==========================
+  // SIMULATION
+  // ==========================
+
+
+  const simulation =
+    useMemo(
+
+      () =>
+
+        calculateSimulation({
+
+          price:
+            currentProduct.price,
+
+
+          downPayment:
+            dp,
+
+
+          tenor,
+
+
+          provider:
+            currentProvider,
+
+
+          oppoCarePrice:
+            currentOppoCare?.price ?? 0,
+
+
+          iotPrice:
+            currentIot?.price ?? 0,
+
+        }),
+
+
+      [
+        currentProduct,
+        currentProvider,
+        currentOppoCare,
+        currentIot,
+        dp,
+        tenor,
+      ]
+
+    );
+
+
+
+
+
+  // ==========================
+  // COPY RESULT
+  // ==========================
+
+
+  function copyResult(
+    title:string,
+    result:any
+  ){
+
+
+    const text =
+
+`
+AVANTO FINANCING SIMULATION
+
+${title}
+
+
+Provider:
+${provider}
+
+
+Product:
+${product}
+
+
+OPPO Care:
+${oppoCare}
+
+
+IoT:
+${iot}
+
+
+Tenor:
+${tenor} Bulan
+
+
+Harga:
+Rp ${result.totalPrice.toLocaleString("id-ID")}
+
+
+DP:
+Rp ${result.downPayment.toLocaleString("id-ID")}
+
+
+Cicilan:
+Rp ${result.monthlyInstallment.toLocaleString("id-ID")}
+/ bulan
+
+
+Promotor:
+${promoterName}
+
+
+WhatsApp:
+${whatsapp}
+`;
+
+
+
+    navigator.clipboard.writeText(text);
+
+
+    alert(
+      "Simulation copied"
+    );
+
+
+  }  // ==========================
+  // SELECTOR STATE
+  // ==========================
+
+
+  const selectorState = {
+
+
+    provider,
+
+
+    providers:
+      FINANCING_PROVIDERS.map(
+        item => item.name
+      ),
+
+
+
+    product,
+
+
+    productOptions:
+      HP_PRODUCTS.map(
+        item => ({
+          label:item.model,
+          value:item.model,
+        })
+      ),
+
+
+
+    productPrice:
+      currentProduct.price,
+
+
+
+    oppoCare,
+
+
+    oppoCareOptions:
+      OPPO_CARE_PRODUCTS.map(
+        item => item.model
+      ),
+
+
+
+    iot,
+
+
+    iotOptions:
+      IOT_PRODUCTS.map(
+        item => item.model
+      ),
+
+
+
+    dp,
+
+
+    tenor,
+
+
+    promoterName,
+
+
+    whatsapp,
+
+
   };
 
+
+
+
+  const selectorActions = {
+
+
+    setProvider,
+
+
+    setProduct,
+
+
+    setOppoCare,
+
+
+    setIot,
+
+
+    setDP,
+
+
+    setTenor,
+
+
+    setPromoterName,
+
+
+    setWhatsapp,
+
+
+  };function shareWhatsapp(){
+
+  const message = 
+`
+AVANTO FINANCING SIMULATION
+
+Produk:
+${product}
+
+Provider:
+${provider}
+
+Tenor:
+${tenor} Bulan
+
+Cicilan:
+Rp ${simulation.smartBundle.monthlyInstallment.toLocaleString("id-ID")}
+/ bulan
+
+Terima kasih.
+`;
+
+  const url =
+  "https://wa.me/?text=" +
+  encodeURIComponent(message);
+
+
+  window.open(url,"_blank");
+
+}
+
+
+
+
+
+
+
+  // ==========================
+  // RETURN
+  // ==========================
+
+
   return (
-    <MainLayout>
-      <Header />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* KOLOM 1: PARAMETER PANEL INPUT */}
-        <div className="space-y-4 lg:col-span-1">
-          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Panel Parameter</span>
-          
-          <PlatformSelector value={platform} onChange={setPlatform} />
-          
-          <SearchableSelect products={HP_PRODUCTS} selectedValue={selectedModel} onChange={setSelectedModel} />
-          
-          {/* INPUT MANUAL DOWN PAYMENT (DP) */}
-          <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/60">
-            <SectionTitle>3. Input Uang Muka / DP Manual (Rp)</SectionTitle>
-            <input
-              type="number"
-              min="0"
-              placeholder="Contoh: 1000000"
-              value={downPayment || ''}
-              onChange={(e) => setDownPayment(Math.max(0, Number(e.target.value)))}
-              className="w-full bg-white border border-slate-200 text-slate-800 font-bold rounded-xl px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-50"
-            />
-            {downPayment > 0 && (
-              <div className="text-[10px] text-emerald-600 font-extrabold mt-1">
-                Terbaca: <Money amount={downPayment} />
-              </div>
-            )}
-          </div>
+<div
+className="
+min-h-screen
+bg-slate-100
+"
+>
 
-          <OppoCareSelector products={OPPO_CARE_PRODUCTS} value={selectedOppoCare} onChange={setSelectedOppoCare} />
-          <IotSelector products={IOT_PRODUCTS} value={selectedIot} onChange={setSelectedIot} />
-          <TenorSelector value={tenor} onChange={setTenor} />
-        </div>
 
-        {/* KOLOM 2: LIVE COMPARISON REPORT CARD */}
-        <div className="bg-slate-50/60 rounded-2xl p-4 border border-slate-100 lg:col-span-1 space-y-4 flex flex-col justify-between">
-          <div>
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">Rincian Komparasi</span>
-            
-            {currentHp && currentHp.price > 0 ? (
-              <div className="space-y-3 text-[11px]">
-                
-                <HpOnlyCard modelName={currentHp.model} result={hpResult} />
-                <SmartBundleCard modelName={currentHp.model} result={bundleResult} />
+<div
+className="
+mx-auto
+max-w-[1600px]
+p-6
+"
+>
 
-                {/* Breakdown Komponen Finansial */}
-                <div className="bg-white border rounded-xl p-3 space-y-1 text-slate-500">
-                  <div className="flex justify-between">
-                    <span>Harga Pokok Gabungan:</span>
-                    <span className="font-bold text-slate-700"><Money amount={totalBundlePrice} /></span>
-                  </div>
-                  <div className="flex justify-between text-red-600 font-semibold">
-                    <span>Potongan DP Manual:</span>
-                    <span>-<Money amount={downPayment} /></span>
-                  </div>
-                  <div className="flex justify-between border-t border-dashed pt-1 mt-1 font-black text-slate-800 text-[12px]">
-                    <span>Sisa Pokok Kredit:</span>
-                    <span><Money amount={Math.max(0, totalBundlePrice - downPayment)} /></span>
-                  </div>
-                  <div className="flex justify-between pt-1">
-                    <span>Biaya Admin Terkapitalisasi:</span>
-                    <span className="font-bold text-slate-700"><Money amount={bundleResult.adminTotal} /></span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Total Beban Bunga (2.99%):</span>
-                    <span className="font-bold text-slate-700"><Money amount={bundleResult.interestTotal} /></span>
-                  </div>
-                </div>
 
-              </div>
-            ) : (
-              <p className="text-xs italic text-slate-400 text-center pt-8">Silakan tentukan parameter smartphone di panel kiri.</p>
-            )}
-          </div>
-          <div className="text-[10px] text-slate-400 text-center italic border-t pt-2">Engine System v3.8 - Excel Sync Approved</div>
-        </div>
 
-        {/* KOLOM 3: LIVE PREVIEW & INSTANT WHATSAPP SHARE */}
-        <div className="lg:col-span-1 flex flex-col justify-between">
-          <div>
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">Live Preview Struk</span>
-            
-            {currentHp && currentHp.price > 0 ? (
-              <div className="border border-amber-200/60 rounded-2xl p-5 shadow-inner font-mono text-[11px] text-amber-950 space-y-4 relative overflow-hidden bg-white">
-                
-                <div className="text-center border-b border-dashed border-amber-300 pb-3">
-                  <div className="font-black tracking-widest text-sm">AVANTO FINANCING</div>
-                  <div className="text-[9px] text-amber-700">OFFICIAL DIGITAL RECEIPT</div>
-                </div>
+<Header
 
-                <div className="space-y-1">
-                  <div>UNIT  : {currentHp.model}</div>
-                  <div>OPSI  : PAKET LENGKAP COMBO</div>
-                  <div className="pl-2 text-amber-800/80">• {currentOppoCare?.model}</div>
-                  <div className="pl-2 text-amber-800/80">• {currentIot?.model}</div>
-                </div>
+title="AVANTO"
 
-                <div className="border-t border-dashed border-amber-300 pt-3 space-y-1">
-                  <div>DP    : Rp {downPayment.toLocaleString('id-ID')}</div>
-                  <div>MITRA : Avanto by {platform}</div>
-                  <div>TENOR : {tenor} BULAN</div>
-                  <div className="text-xs font-bold bg-amber-100 p-1.5 rounded mt-2 flex justify-between">
-                    <span>ANGSURAN:</span>
-                    <span><Money amount={bundleResult.monthlyInstallment} />/bln</span>
-                  </div>
-                </div>
+subtitle="OPPO Official Financing Simulator"
 
-                <div className="pt-2 grid grid-cols-1 gap-2 font-sans">
-                  <button
-                    type="button"
-                    onClick={() => handleCopyStruk('paketlengkap')}
-                    className={`w-full py-2 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 ${
-                      copied ? 'bg-emerald-600 text-white' : 'bg-slate-900 text-white hover:bg-slate-800'
-                    }`}
-                  >
-                    {copied ? '✅ Berhasil Disalin!' : '📋 Salin Struk Paket Lengkap'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleCopyStruk('hpsaja')}
-                    className="w-full py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-xl font-medium text-xs transition-all text-center"
-                  >
-                    Salin Struk Opsi HP Saja
-                  </button>
-                </div>
+/>
 
-              </div>
-            ) : (
-              <div className="h-full min-h-[200px] border border-dashed rounded-2xl flex flex-col items-center justify-center text-center p-4 bg-slate-50 text-slate-400 text-xs">
-                Struk otomatis terisi setelah memilih unit.
-              </div>
-            )}
-          </div>
-        </div>
 
-      </div>
-    </MainLayout>
-  );
+
+
+
+
+{/* ==========================
+      THREE COLUMN LAYOUT
+========================== */}
+
+
+<div
+
+className="
+mt-8
+
+grid
+
+grid-cols-1
+
+gap-6
+
+
+xl:grid-cols-[320px_minmax(420px,1fr)_380px]
+
+"
+
+>
+
+
+
+
+
+
+
+{/* ==========================
+        LEFT
+        SELECTOR
+========================== */}
+
+
+<div>
+
+
+<SelectorPanel
+
+state={selectorState}
+
+actions={selectorActions}
+
+/>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+{/* ==========================
+        CENTER
+        COMPARISON
+========================== */}
+
+
+
+<div
+className="
+space-y-6
+"
+>
+
+
+
+<SummaryCard
+
+provider={provider}
+
+product={product}
+
+tenor={tenor}
+
+dp={dp}
+
+
+hpOnly={
+simulation.hpOnly.monthlyInstallment
+}
+
+
+smartBundle={
+simulation.smartBundle.monthlyInstallment
+}
+
+
+/>
+
+
+
+
+
+
+
+
+<ResultCard
+
+title="HP ONLY"
+
+icon="📱"
+
+
+providerName={provider}
+
+
+productName={product}
+
+
+tenor={tenor}
+
+
+
+monthlyInstallment={
+simulation.hpOnly.monthlyInstallment
+}
+
+
+
+productPrice={
+simulation.hpOnly.totalPrice
+}
+
+
+
+downPayment={
+simulation.hpOnly.downPayment
+}
+
+
+
+financedAmount={
+simulation.hpOnly.principal
+}
+
+
+
+admin={
+simulation.hpOnly.adminFee
+}
+
+
+
+interest={
+simulation.hpOnly.interest
+}
+
+
+
+
+onCopy={() =>
+copyResult(
+"HP ONLY",
+simulation.hpOnly
+)
+}
+
+
+
+/>
+
+
+
+
+
+
+
+
+
+
+
+<ResultCard
+
+title="SMART BUNDLE"
+
+icon="🎁"
+
+
+highlight
+
+
+
+providerName={provider}
+
+
+
+productName={
+
+`${product}
++ ${oppoCare}
++ ${iot}`
+
+}
+
+
+
+tenor={tenor}
+
+
+
+monthlyInstallment={
+simulation.smartBundle.monthlyInstallment
+}
+
+
+
+productPrice={
+simulation.smartBundle.totalPrice
+}
+
+
+
+downPayment={
+simulation.smartBundle.downPayment
+}
+
+
+
+financedAmount={
+simulation.smartBundle.principal
+}
+
+
+
+admin={
+simulation.smartBundle.adminFee
+}
+
+
+
+interest={
+simulation.smartBundle.interest
+}
+
+
+
+
+onCopy={() =>
+copyResult(
+"SMART BUNDLE",
+simulation.smartBundle
+)
+}
+
+
+
+/>
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+{/* ==========================
+        RIGHT
+        QUOTATION
+========================== */}
+
+
+<div>
+
+
+
+<div
+
+className="
+sticky
+top-6
+
+overflow-hidden
+
+rounded-3xl
+
+border
+border-slate-200
+
+bg-white
+
+shadow-sm
+
+"
+
+>
+
+
+
+<div
+
+className="
+bg-slate-900
+
+p-6
+
+text-white
+"
+
+>
+
+
+<p
+
+className="
+text-xs
+uppercase
+tracking-widest
+text-slate-300
+"
+
+>
+
+AVANTO
+
+</p>
+
+
+
+<h2
+
+className="
+mt-2
+text-xl
+font-black
+"
+
+>
+
+Customer Financing Plan
+
+</h2>
+
+
+
+<p
+
+className="
+mt-1
+text-sm
+text-slate-300
+"
+
+>
+
+OPPO Official Financing
+
+</p>
+
+
+</div>
+
+
+
+
+
+
+<div
+
+className="
+space-y-6
+p-6
+"
+
+>
+
+
+
+
+
+<div>
+
+<p
+className="
+text-xs
+uppercase
+tracking-wide
+text-slate-400
+"
+>
+Product
+</p>
+
+
+<h3
+className="
+mt-1
+font-bold
+text-slate-900
+"
+>
+{product}
+</h3>
+
+
+</div>
+
+
+
+
+
+<div
+className="
+grid
+grid-cols-2
+gap-4
+"
+>
+
+
+<div>
+
+<p
+className="
+text-xs
+text-slate-400
+"
+>
+Financing
+</p>
+
+
+<p
+className="
+mt-1
+font-bold
+text-slate-800
+"
+>
+{provider}
+</p>
+
+
+</div>
+
+
+
+
+
+<div>
+
+<p
+className="
+text-xs
+text-slate-400
+"
+>
+Tenor
+</p>
+
+
+<p
+className="
+mt-1
+font-bold
+text-slate-800
+"
+>
+{tenor} Bulan
+</p>
+
+
+</div>
+
+
+</div>{/* PAYMENT */}
+
+<div
+
+className="
+rounded-2xl
+bg-emerald-600
+p-5
+text-white
+"
+
+>
+
+
+<p
+className="
+text-xs
+uppercase
+tracking-widest
+text-emerald-100
+"
+>
+
+Monthly Payment
+
+</p>
+
+
+
+<h1
+
+className="
+mt-2
+text-3xl
+font-black
+"
+
+>
+
+Rp {
+simulation.smartBundle.monthlyInstallment
+.toLocaleString("id-ID")
+}
+
+</h1>
+
+
+<p
+className="
+text-sm
+text-emerald-100
+"
+>
+per bulan
+</p>
+
+
+</div>
+
+
+
+
+
+
+{/* DETAIL */}
+
+<div
+
+className="
+space-y-3
+border-t
+pt-5
+"
+
+>
+
+
+<ReceiptRow
+
+label="Harga Produk"
+
+value={
+"Rp "+
+simulation.smartBundle.totalPrice
+.toLocaleString("id-ID")
+}
+
+/>
+
+
+
+<ReceiptRow
+
+label="Down Payment"
+
+value={
+"Rp "+
+simulation.smartBundle.downPayment
+.toLocaleString("id-ID")
+}
+
+/>
+
+
+
+<ReceiptRow
+
+label="Biaya Admin"
+
+value={
+"Rp "+
+simulation.smartBundle.adminFee
+.toLocaleString("id-ID")
+}
+
+/>
+
+
+
+<ReceiptRow
+
+label="Total Bunga"
+
+value={
+"Rp "+
+simulation.smartBundle.interest
+.toLocaleString("id-ID")
+}
+
+/>
+
+
+
+</div>
+
+
+
+
+
+
+
+<button
+
+className="
+mt-6
+w-full
+
+rounded-2xl
+
+bg-slate-900
+
+py-3
+
+font-bold
+
+text-white
+
+hover:bg-slate-800
+
+"
+
+>
+
+📸 Generate PNG Result
+
+</button>
+
+
+
+
+<button
+
+
+onClick={shareWhatsapp}
+
+className="
+mt-3
+w-full
+rounded-2xl
+border
+border-slate-200
+py-3
+font-bold
+text-slate-700
+hover:bg-slate-50
+"
+
+>
+
+📲 Share WhatsApp
+
+
+
+</button>
+
+
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+<footer
+
+className="
+mt-12
+
+rounded-3xl
+
+border
+
+border-slate-100
+
+bg-white
+
+p-8
+
+shadow-sm
+
+"
+
+>
+
+
+<div
+
+className="
+flex
+
+flex-col
+
+items-center
+
+gap-6
+
+"
+
+>
+
+
+<div
+
+className="
+flex
+
+h-16
+
+w-48
+
+items-center
+
+justify-center
+
+"
+
+>
+
+<img
+
+src={avantoLogo}
+
+alt="Avanto"
+
+className="
+max-h-14
+max-w-full
+object-contain
+"
+
+/>
+
+</div>
+
+
+
+
+
+<p
+className="
+text-sm
+text-slate-500
+"
+>
+
+OPPO Official Financing Platform
+
+</p>
+
+
+
+
+
+
+
+<div
+
+className="
+flex
+flex-wrap
+items-center
+justify-center
+gap-6
+
+"
+
+>
+
+
+
+<div
+className="
+flex
+h-12
+w-32
+items-center
+justify-center
+"
+>
+
+<img
+
+src={oppoLogo}
+
+alt="OPPO"
+
+className="
+h-10
+w-auto
+object-contain
+"
+
+/>
+
+</div>
+
+
+
+
+<div
+className="
+flex
+h-12
+w-32
+items-center
+justify-center
+"
+>
+
+<img
+
+src={yesssLogo}
+
+alt="Yessscredit"
+
+className="
+max-h-8
+max-w-full
+object-contain
+"
+
+/>
+
+</div>
+
+
+
+
+<div
+className="
+flex
+h-12
+w-32
+items-center
+justify-center
+"
+>
+
+<img
+
+src={kredivoLogo}
+
+alt="Kredivo"
+
+className="
+max-h-8
+max-w-full
+object-contain
+"
+
+/>
+
+</div>
+
+
+
+</div>
+
+
+
+</div>
+
+
+</footer>
+
+
+
+
+
+</div>
+
+</div>
+
+);
+
+}
+
+
+
+
+
+function ReceiptRow({
+
+label,
+value,
+
+}:{
+
+label:string;
+
+value:string;
+
+}){
+
+
+return (
+
+<div
+
+className="
+flex
+justify-between
+
+border-b
+
+border-slate-100
+
+pb-2
+
+"
+
+>
+
+
+<span
+
+className="
+text-sm
+text-slate-500
+"
+
+>
+
+{label}
+
+</span>
+
+
+
+<span
+
+className="
+text-sm
+font-bold
+text-slate-800
+"
+
+>
+
+{value}
+
+</span>
+
+
+</div>
+
+);
+
+
 }
