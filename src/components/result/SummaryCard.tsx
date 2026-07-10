@@ -59,7 +59,7 @@ export default function SummaryCard({
 
         <div className="rounded-2xl bg-white/15 p-4 backdrop-blur">
           <p className="text-sm">📱 HP ONLY</p>
-          <h3 className="mt-2 text-3xl font-black">
+          <h3 className="mt-2 text-xl sm:text-3xl font-black">
             {rupiah(hpOnly)}
           </h3>
           <p className="text-sm">/ bulan</p>
@@ -70,7 +70,7 @@ export default function SummaryCard({
             🎁 SMART BUNDLE
           </p>
 
-          <h3 className="mt-2 text-3xl font-black">
+          <h3 className="mt-2 text-xl sm:text-3xl font-black">
             {rupiah(smartBundle)}
           </h3>
 
@@ -87,7 +87,7 @@ export default function SummaryCard({
           ⭐ Tambah hanya
         </p>
 
-        <h2 className="text-4xl font-black">
+        <h2 className="mt-2 text-3xl sm:text-4xl font-black">
           {rupiah(difference)}
         </h2>
 
