@@ -6,6 +6,7 @@ import ProductSelector from "./ProductSelector";
 import OppoCareSelector from "./OppoCareSelector";
 import IotSelector from "./IotSelector";
 import TenorSelector from "./TenorSelector";
+import InterestRateSelector from "./InterestRateSelector";
 import PromotorForm from "./PromotorForm";
 import DPInput from "./DPInput";
 
@@ -35,6 +36,7 @@ interface SelectorPanelProps {
 
     dp: number;
     tenor: number;
+    interestRate: number;
 
     promoterName: string;
     whatsapp: string;
@@ -51,6 +53,7 @@ interface SelectorPanelProps {
 
     setDP:(value:number)=>void;
     setTenor:(value:number)=>void;
+    setInterestRate:(value:number)=>void;
 
     setPromoterName:(value:string)=>void;
     setWhatsapp:(value:string)=>void;
@@ -111,7 +114,6 @@ onChange={actions.setProvider}
 
 
 
-
 {/* PRODUCT */}
 
 <section>
@@ -139,7 +141,6 @@ options={state.productOptions}
 onChange={actions.setProduct}
 
 />
-
 
 
 
@@ -192,7 +193,6 @@ Rp {state.productPrice.toLocaleString("id-ID")}
 
 
 
-
 <div>
 
 <Label>
@@ -212,7 +212,6 @@ onChange={actions.setDP}
 
 
 </div>
-
 
 
 
@@ -266,8 +265,6 @@ Rp {(state.productPrice-state.dp)
 </div>
 
 </section>
-
-
 
 
 
@@ -328,9 +325,6 @@ onChange={actions.setIot}
 
 
 
-
-
-
 {/* TENOR */}
 
 <section>
@@ -357,8 +351,30 @@ onChange={actions.setTenor}
 </section>
 
 
+{/* INTEREST RATE */}
+
+<section>
 
 
+<SectionLabel
+
+icon="💰"
+
+title="Pilihan Bunga"
+
+/>
+
+
+<InterestRateSelector
+
+value={state.interestRate}
+
+onChange={actions.setInterestRate}
+
+/>
+
+
+</section>
 
 
 {/* PROMOTOR */}
@@ -393,8 +409,6 @@ onWhatsappChange={actions.setWhatsapp}
 
 
 
-
-
 </div>
 
 
@@ -405,8 +419,6 @@ onWhatsappChange={actions.setWhatsapp}
 
 
 }
-
-
 
 
 
@@ -452,7 +464,6 @@ text-slate-800
 )
 
 }
-
 
 
 
