@@ -197,7 +197,7 @@ export default function App() {
 
   function copyResult(
     title:string,
-    result:any
+    result:typeof simulation.hpOnly
   ){
 
 
@@ -1049,62 +1049,26 @@ simulation.smartBundle.interest
 
 
 
-
-
-
-
 <button
-
-className="
-mt-6
-w-full
-
-rounded-2xl
-
-bg-slate-900
-
-py-3
-
-font-bold
-
-text-white
-
-hover:bg-slate-800
-
-"
-
+  onClick={() =>
+    copyResult(
+      "SMART BUNDLE",
+      simulation.smartBundle
+    )
+  }
+  className="
+    mt-3
+    w-full
+    rounded-2xl
+    border
+    border-slate-200
+    py-3
+    font-bold
+    text-slate-700
+    hover:bg-slate-50
+  "
 >
-
-📸 Generate PNG Result
-
-</button>
-
-
-
-
-<button
-
-
-onClick={shareWhatsapp}
-
-className="
-mt-3
-w-full
-rounded-2xl
-border
-border-slate-200
-py-3
-font-bold
-text-slate-700
-hover:bg-slate-50
-"
-
->
-
-📲 Share WhatsApp
-
-
-
+📋 Copy Simulation
 </button>
 
 
