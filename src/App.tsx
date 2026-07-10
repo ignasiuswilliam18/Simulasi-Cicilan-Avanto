@@ -431,9 +431,6 @@ subtitle="OPPO Official Financing Simulator"
 
 
 
-
-
-
 {/* ==========================
       THREE COLUMN LAYOUT
 ========================== */}
@@ -1168,8 +1165,6 @@ object-contain
 
 
 
-
-
 <p
 className="
 text-sm
@@ -1180,10 +1175,6 @@ text-slate-500
 OPPO Official Financing Platform
 
 </p>
-
-
-
-
 
 
 
@@ -1219,7 +1210,7 @@ src={oppoLogo}
 alt="OPPO"
 
 className="
-h-10
+h-14
 w-auto
 object-contain
 "
