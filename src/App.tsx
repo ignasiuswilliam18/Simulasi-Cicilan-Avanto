@@ -200,7 +200,6 @@ export default function App() {
     result:typeof simulation.hpOnly
   ){
 
-
     const text =
 
 `
