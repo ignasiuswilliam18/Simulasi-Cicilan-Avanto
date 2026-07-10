@@ -3,7 +3,7 @@ interface InterestRateSelectorProps {
   onChange: (value: number) => void;
 }
 
-const INTEREST_RATES = [2.7, 2.99, 3.75, 3.99];
+const INTEREST_RATES = [0.0, 2.7, 2.99, 3.75, 3.99];
 
 export default function InterestRateSelector({
   value,
