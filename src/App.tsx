@@ -68,13 +68,16 @@ export default function App() {
     useState(3);
 
 
+  const [interestRate,setInterestRate] =
+    useState(3.75);
+
+
   const [promoterName,setPromoterName] =
     useState("");
 
 
   const [whatsapp,setWhatsapp] =
     useState("");
-
 
 
 
@@ -136,8 +139,6 @@ export default function App() {
 
 
 
-
-
   // ==========================
   // SIMULATION
   // ==========================
@@ -172,6 +173,8 @@ export default function App() {
           iotPrice:
             currentIot?.price ?? 0,
 
+          interestRate,
+
         }),
 
 
@@ -182,10 +185,10 @@ export default function App() {
         currentIot,
         dp,
         tenor,
+        interestRate,
       ]
 
     );
-
 
 
 
@@ -226,6 +229,10 @@ ${iot}
 
 Tenor:
 ${tenor} Bulan
+
+
+Bunga:
+${interestRate}%
 
 
 Harga:
@@ -320,6 +327,7 @@ ${whatsapp}
 
     tenor,
 
+    interestRate,
 
     promoterName,
 
@@ -352,6 +360,7 @@ ${whatsapp}
 
     setTenor,
 
+    setInterestRate,
 
     setPromoterName,
 
@@ -374,6 +383,9 @@ ${provider}
 Tenor:
 ${tenor} Bulan
 
+Bunga:
+${interestRate}%
+
 Cicilan:
 Rp ${simulation.smartBundle.monthlyInstallment.toLocaleString("id-ID")}
 / bulan
@@ -389,9 +401,6 @@ Terima kasih.
   window.open(url,"_blank");
 
 }
-
-
-
 
 
 
@@ -457,9 +466,6 @@ xl:grid-cols-[320px_minmax(420px,1fr)_380px]
 
 
 
-
-
-
 {/* ==========================
         LEFT
         SELECTOR
@@ -479,12 +485,6 @@ actions={selectorActions}
 
 
 </div>
-
-
-
-
-
-
 
 
 
@@ -526,10 +526,6 @@ simulation.smartBundle.monthlyInstallment
 
 
 />
-
-
-
-
 
 
 
@@ -585,7 +581,7 @@ interest={
 simulation.hpOnly.interest
 }
 
-
+interestRate={interestRate}
 
 
 onCopy={() =>
@@ -598,13 +594,6 @@ simulation.hpOnly
 
 
 />
-
-
-
-
-
-
-
 
 
 
@@ -672,7 +661,7 @@ interest={
 simulation.smartBundle.interest
 }
 
-
+interestRate={interestRate}
 
 
 onCopy={() =>
@@ -688,13 +677,7 @@ simulation.smartBundle
 
 
 
-
 </div>
-
-
-
-
-
 
 
 
@@ -798,8 +781,6 @@ OPPO Official Financing
 
 
 
-
-
 <div
 
 className="
@@ -808,7 +789,6 @@ p-6
 "
 
 >
-
 
 
 
@@ -839,7 +819,6 @@ text-slate-900
 
 
 </div>
-
 
 
 
@@ -877,7 +856,6 @@ text-slate-800
 
 
 </div>
-
 
 
 
@@ -966,8 +944,6 @@ per bulan
 
 
 </div>
-
-
 
 
 
@@ -1081,13 +1057,7 @@ simulation.smartBundle.interest
 
 
 
-
-
-
 </div>
-
-
-
 
 
 
@@ -1221,7 +1191,6 @@ object-contain
 
 
 
-
 <div
 className="
 flex
@@ -1247,7 +1216,6 @@ object-contain
 />
 
 </div>
-
 
 
 
@@ -1291,7 +1259,6 @@ object-contain
 
 
 
-
 </div>
 
 </div>
@@ -1299,7 +1266,6 @@ object-contain
 );
 
 }
-
 
 
 
