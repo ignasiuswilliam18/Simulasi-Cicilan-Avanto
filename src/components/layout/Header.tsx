@@ -28,7 +28,7 @@ export default function Header({
         <img
           src={oppoLogo}
           alt="OPPO"
-          className="mt-6 h-10 w-auto object-contain"
+          className="mt-6 h-16 w-auto object-contain"
         />
 
       </div>
